@@ -7,11 +7,11 @@
 using namespace chess;
 
 //remove comment for seeing debugging...
-#define LOGGING
+//#define LOGGING
 //remove comment for using transposition table...
 #define TT
 //remove comment for using alpha-beta pruning
-#define PRUNING 
+//#define PRUNING 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
@@ -72,8 +72,9 @@ Movelist Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
                 quietMovesHistory.push_back(std::make_pair(move, it->second));
                 continue;
             }
-            quietMoves.add(move);
         #endif
+        quietMoves.add(move);
+        
     }
     //sorting attacking moves by values...
     sort(attackingMoves.begin(), attackingMoves.end(), [](auto const &a, auto const &b)
@@ -225,11 +226,9 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         #endif
         int value = -best_priv(board, local_depth - 1, -beta, -alpha);
         max_value = std::max(max_value, value);
-        #ifdef PRUNING
-            alpha = std::max(alpha, max_value);
-        #endif
         board.unmakeMove(move);
         #ifdef PRUNING
+            alpha = std::max(alpha, max_value);
             if (alpha >= beta)
             {
                 if (!board.isCapture(move)){
@@ -268,10 +267,10 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         best_move_until_now = this->best(board, curr_depth);
         #ifdef LOGGING
-        std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<< std::endl;
+        std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<< " for searching at depth: " << curr_depth <<std::endl;
         #endif
         curr_depth++;
     }
-    this->curr_depth = 1;
+    curr_depth = 1;
     return best_move_until_now;
 }
