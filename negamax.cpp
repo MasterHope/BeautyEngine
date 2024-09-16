@@ -11,7 +11,7 @@ using namespace chess;
 //remove comment for using transposition table...
 #define TT
 //remove comment for using alpha-beta pruning
-//#define PRUNING 
+#define PRUNING 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
