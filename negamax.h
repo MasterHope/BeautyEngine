@@ -27,7 +27,7 @@ public:
     Move iterative_deepening(Board &board);
 
     Move best(Board &board, int depth);
-    int quiescience(Board &board, int alpha, int beta);
+    int quiescence(Board &board, int alpha, int beta);
 
 private:
     int best_priv(Board &board, int depth, int alpha, int beta);

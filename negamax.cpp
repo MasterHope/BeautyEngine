@@ -21,6 +21,7 @@ using namespace chess;
 #define PRUNING
 //comment for removing move ordering
 #define MOVEORDERING 
+
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
@@ -29,6 +30,27 @@ std::string position(Color player, Square square_from, Square square_to){
     pos.append(";");
     pos.append(std::string(square_to));
     return pos;
+}
+//https://www.chessprogramming.org/Quiescence_Search
+int Negamax::quiescence(Board &board, int alpha, int beta){
+    int stand_pat = this->model->eval(board);
+    if( stand_pat >= beta )
+        return beta;
+    if( alpha < stand_pat )
+        alpha = stand_pat;
+    //Generating only capture moves...
+    Movelist moves;
+    movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
+    for(const auto &move : moves)  {
+        board.makeMove(move);
+        int score = -quiescence( board,-beta, -alpha );
+        board.unmakeMove(move);
+        if( score >= beta )
+            return beta;
+        if( score > alpha )
+           alpha = score;
+    }
+    return alpha;
 }
 
 void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
@@ -159,11 +181,11 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     } */
     if (local_depth == 0)
     {
-        int ss_eval = this->model->eval(board); 
+        int qs = this->quiescence(board, alpha, beta);
         #ifdef LOGGING
-            std::clog <<"Score = " << ss_eval << std::endl;
+            std::clog <<"Score = " << qs << std::endl;
         #endif
-        return ss_eval;
+        return qs;
 
     }
     #if defined(TT) && defined(PRUNING)
