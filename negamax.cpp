@@ -7,7 +7,7 @@
 using namespace chess;
 
 //score for move ordering
-#define CHECKMATE_SCORE 20000
+#define CHECKMATE_SCORE 200000
 #define BEST_MOVE INT16_MAX
 #define CHECKMATE_MOVE INT16_MAX - 1
 #define CHECK_MOVE INT16_MAX - 2
@@ -16,8 +16,13 @@ using namespace chess;
 //Quiescience depth if enabled
 #define QUIESCIENCE_DEPTH 3
 
+
 //remove comment for seeing debugging...
 //#define LOGGING
+
+
+//ENGINE FEATURES
+
 //comment for removing transposition table...
 #define TT
 //comment for removing alpha-beta pruning
@@ -39,17 +44,18 @@ std::string position(Color player, Square square_from, Square square_to){
 }
 //https://www.chessprogramming.org/Quiescence_Search
 int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth){
+    //Generating only capture moves...
+    Movelist moves;
+    movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
     int stand_pat = this->model->eval(board);
-    if (quiescence_depth == 0){
+    //if it is a quiet position or if the recursion stops, than return standard evaluation.
+    if (quiescence_depth == 0 || moves.size() == 0){
         return stand_pat;
     }
     if( stand_pat >= beta )
         return beta;
     if( alpha < stand_pat )
         alpha = stand_pat;
-    //Generating only capture moves...
-    Movelist moves;
-    movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
     //ordering captures
     for (int i = 0; i < moves.size(); i++){
         Move move = moves[i];
@@ -62,8 +68,10 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth)
     
     for(const auto &move : moves)  {
         board.makeMove(move);
+        ply++;
         int score = -quiescence( board,-beta, -alpha, quiescence_depth-1);
         board.unmakeMove(move);
+        ply--;
         if( score >= beta )
             return beta;
         if( score > alpha )
@@ -196,12 +204,12 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         return 0;
     }
     //if board is in check, we work at higher depth...
-    /* if (board.inCheck()){
+    if (board.inCheck()){
         local_depth++;
         #ifdef LOGGING
         std::clog<< std::endl;
         #endif
-    } */
+    }
     if (local_depth == 0)
     {
         int value;
