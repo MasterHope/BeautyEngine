@@ -6,12 +6,14 @@
 #include <iostream>
 using namespace chess;
 
+//score for move ordering
 #define CHECKMATE_SCORE 20000
 #define BEST_MOVE INT16_MAX
 #define CHECKMATE_MOVE INT16_MAX - 1
 #define CHECK_MOVE INT16_MAX - 2
 #define QUIET_MOVE INT16_MIN
 
+//Quiescience depth if enabled
 #define QUIESCIENCE_DEPTH 3
 
 //remove comment for seeing debugging...
@@ -22,6 +24,8 @@ using namespace chess;
 #define PRUNING
 //comment for removing move ordering
 #define MOVEORDERING 
+//comment for removing quiescence
+#define QUIESCENCE
 
 
 std::string position(Color player, Square square_from, Square square_to){
@@ -200,11 +204,17 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     } */
     if (local_depth == 0)
     {
-        int qs = this->quiescence(board, alpha, beta, QUIESCIENCE_DEPTH);
-        #ifdef LOGGING
-            std::clog <<"Score = " << qs << std::endl;
+        int value;
+        #ifdef QUIESCENCE
+        value = this->quiescence(board, alpha, beta, QUIESCIENCE_DEPTH);
         #endif
-        return qs;
+        #ifndef QUIESCENCE
+        value = this->model->eval(board);
+        #endif
+        #ifdef LOGGING
+            std::clog <<"Score = " << value << std::endl;
+        #endif
+        return value;
 
     }
     #if defined(TT) && defined(PRUNING)
