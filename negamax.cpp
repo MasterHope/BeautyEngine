@@ -11,12 +11,16 @@ using namespace chess;
 #define CHECKMATE_MOVE INT16_MAX - 1
 #define CHECK_MOVE INT16_MAX - 2
 #define QUIET_MOVE INT16_MIN
+
+
 //remove comment for seeing debugging...
 //#define LOGGING
-//remove comment for using transposition table...
+//comment for removing transposition table...
 #define TT
-//remove comment for using alpha-beta pruning
-#define PRUNING 
+//comment for removing alpha-beta pruning
+#define PRUNING
+//comment for removing move ordering
+#define MOVEORDERING 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
@@ -87,9 +91,10 @@ Move Negamax::best(Board &board, int local_depth)
 {
     Movelist moves;
     movegen::legalmoves(moves, board);
-    //move_ordering
+    //move_ordering if def
+    #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
-
+    #endif
     int bestEvaluation = INT_MIN;
     int alpha = INT_MIN;
     int beta = INT_MAX;
@@ -194,8 +199,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     int max_value = INT_MIN;
     Movelist moves;
     movegen::legalmoves(moves, board);
-    //move_ordering
+    //move_ordering if def
+    #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
+    #endif
     //finding best move 
     for (const auto &move : moves)
     {
