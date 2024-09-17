@@ -48,6 +48,7 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth)
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
     int stand_pat = this->model->eval(board);
+    
     //if it is a quiet position or if the recursion stops, than return standard evaluation.
     if (quiescence_depth == 0 || moves.size() == 0){
         return stand_pat;
@@ -67,6 +68,10 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth)
          { return a.score() > b.score(); });
     
     for(const auto &move : moves)  {
+        //not checking losing moves...
+        if (move.score() < 0){
+            continue;
+        }
         board.makeMove(move);
         ply++;
         int score = -quiescence( board,-beta, -alpha, quiescence_depth-1);
@@ -203,7 +208,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         #endif
         return 0;
     }
-    //if board is in check, we work at higher depth...
+    //if board is in check, we work at higher depth... (like rice engine)...
     if (board.inCheck()){
         local_depth++;
         #ifdef LOGGING
@@ -223,8 +228,17 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
             std::clog <<"Score = " << value << std::endl;
         #endif
         return value;
-
     }
+    //from rice engine: check mates...
+    //MATED IN
+    alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
+    //MATE IN
+    beta = std::min(beta, CHECKMATE_SCORE - ply - 1);
+    //prune if mate founded...
+    if (alpha >= beta){
+        return alpha;
+    }
+
     #if defined(TT) && defined(PRUNING)
         int alphaOrigin = alpha;
         // transposition table check if position already exists...
