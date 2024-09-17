@@ -36,12 +36,17 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
     #ifdef TT
         TTEntry ttEntry = table->lookup(board);
         // best move from previous iteration...
-        if (ttEntry.bestMove != Move())
-        {
+        if (ttEntry.bestMove != Move()){
             if (auto move = std::find(moves.begin(), moves.end(), ttEntry.bestMove)){
                 move->setScore(BEST_MOVE);
             }
-        } 
+        //Internal Iterative Deepening...
+        } else if (local_depth > 4){
+            Move best = this->best(board, local_depth - 3);
+            auto move_found = std::find(moves.begin(), moves.end(), best);
+            move_found->setScore(BEST_MOVE);
+        }
+       
     #endif
     for (int i = 0; i < moves.size(); i++)
     {
