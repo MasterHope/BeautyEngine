@@ -6,6 +6,11 @@
 #include <iostream>
 using namespace chess;
 
+#define CHECKMATE_SCORE 20000
+#define KILLER_MOVE INT16_MAX
+#define CHECKMATE_MOVE INT16_MAX - 1
+#define CHECK_MOVE INT16_MAX - 2
+#define QUIET_MOVE INT16_MIN
 //remove comment for seeing debugging...
 //#define LOGGING
 //remove comment for using transposition table...
@@ -22,23 +27,21 @@ std::string position(Color player, Square square_from, Square square_to){
     return pos;
 }
 
-Movelist Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
+void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
 {
-
-    Movelist orderedMoves = Movelist();
-    Movelist quietMoves = Movelist();
-    std::vector<std::pair<Move, int>> quietMovesHistory;
-    std::vector<std::pair<Move, int>> attackingMoves;
     #ifdef TT
         TTEntry ttEntry = table->lookup(board);
         // best move from previous iteration...
         if (ttEntry.bestMove != Move())
         {
-            orderedMoves.add(ttEntry.bestMove);
+            if (auto move = std::find(moves.begin(), moves.end(), ttEntry.bestMove)){
+                move->setScore(KILLER_MOVE);
+            }
         } 
     #endif
-    for (const auto &move : moves)
+    for (int i = 0; i < moves.size(); i++)
     {
+        Move move = moves[i];
         #ifdef TT
         if (move == ttEntry.bestMove){
             continue;
@@ -47,8 +50,8 @@ Movelist Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         //add check moves first...
         board.makeMove(move);
         if (board.inCheck()){
-            int eval = board.isGameOver().first == GameResultReason::CHECKMATE ? INT_MAX : INT_MAX - 1;
-            attackingMoves.push_back(std::make_pair(move, eval));
+            int eval = board.isGameOver().first == GameResultReason::CHECKMATE ? CHECKMATE_MOVE : CHECK_MOVE;
+            move.setScore(eval);
             board.unmakeMove(move);
             continue;       
         }
@@ -62,43 +65,21 @@ Movelist Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
             int pieceToIndex = int(pieceTo.type());
             // calculating the value of the attack following MVV-LAA...
             int attacking_value =  piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
-            attackingMoves.push_back(std::make_pair(move, attacking_value));
+            move.setScore(attacking_value);
             continue;
         }
         //return end if not found...
         #ifdef PRUNING
             std::map<std::string, int>::iterator it = history.find(position(board.sideToMove(), move.from(), move.to()));
             if (it !=history.end()){
-                quietMovesHistory.push_back(std::make_pair(move, it->second));
+                move.setScore(it->second);
                 continue;
             }
         #endif
-        quietMoves.add(move);
-        
+        move.setScore(QUIET_MOVE);
     }
-    //sorting attacking moves by values...
-    sort(attackingMoves.begin(), attackingMoves.end(), [](auto const &a, auto const &b)
-         { return a.second > b.second; });
-    //add first attacking moves, then other...
-    for (const auto &move_value : attackingMoves){
-        Move move = move_value.first;
-        orderedMoves.add(move);
-    }
-    //sorting quiet moves by history...
-    #ifdef PRUNING
-        sort(quietMovesHistory.begin(), quietMovesHistory.end(), [](auto const &a, auto const &b)
-            { return a.second > b.second; });
-        //add historymoves...
-        for (const auto &move_value : quietMovesHistory){
-            Move move = move_value.first;
-            orderedMoves.add(move);
-        }
-    #endif
-    for (const auto &move : quietMoves){
-        orderedMoves.add(move);
-    }
-    
-    return orderedMoves;
+    std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
+         { return a.score() > b.score(); });
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
@@ -107,7 +88,7 @@ Move Negamax::best(Board &board, int local_depth)
     Movelist moves;
     movegen::legalmoves(moves, board);
     //move_ordering
-    moves = this->moveOrdering(board, moves, local_depth);
+    this->moveOrdering(board, moves, local_depth);
 
     int bestEvaluation = INT_MIN;
     int alpha = INT_MIN;
@@ -141,6 +122,38 @@ Move Negamax::best(Board &board, int local_depth)
 }
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
 {
+    //check if we find a terminal state...
+     std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
+    //handling checkmates...
+    if (reason_result.first == GameResultReason::CHECKMATE){
+        #ifdef LOGGING
+            std::clog << "Checkmate Detected" << std::endl;
+        #endif
+        return -CHECKMATE_SCORE + local_depth; 
+    }
+    //repeating moves will return 0...
+    if (reason_result.second == GameResult::DRAW){
+        #ifdef LOGGING
+            std::clog << "0=DRAW" << std::endl;
+        #endif
+        return 0;
+    }
+    //if board is in check, we work at higher depth...
+    /* if (board.inCheck()){
+        local_depth++;
+        #ifdef LOGGING
+        std::clog<< std::endl;
+        #endif
+    } */
+    if (local_depth == 0)
+    {
+        int ss_eval = this->model->eval(board); 
+        #ifdef LOGGING
+            std::clog <<"Score = " << ss_eval << std::endl;
+        #endif
+        return ss_eval;
+
+    }
     #if defined(TT) && defined(PRUNING)
         int alphaOrigin = alpha;
         // transposition table check if position already exists...
@@ -178,42 +191,11 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         }
     #endif
     // alpha beta main method...
-    std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
-    //handling checkmates...
-    if (reason_result.first == GameResultReason::CHECKMATE){
-        #ifdef LOGGING
-            std::clog << "Checkmate Detected" << std::endl;
-        #endif
-        return -piecesEval[int(PieceType::KING)] * 10 + local_depth;
-    }
-    //if board is in check, we work at higher depth...
-    /* if (board.inCheck()){
-        local_depth++;
-        #ifdef LOGGING
-        std::clog<< std::endl;
-        #endif
-    } */
-    //repeating moves will return 0...
-    if (reason_result.second == GameResult::DRAW){
-        #ifdef LOGGING
-            std::clog << "0=DRAW" << std::endl;
-        #endif
-        return 0;
-    }
-    if (local_depth == 0)
-    {
-        int ss_eval = this->model->eval(board); 
-        #ifdef LOGGING
-            std::clog <<"Score = " << ss_eval << std::endl;
-        #endif
-        return ss_eval;
-
-    }
     int max_value = INT_MIN;
     Movelist moves;
     movegen::legalmoves(moves, board);
     //move_ordering
-    moves = this->moveOrdering(board, moves, local_depth);
+    this->moveOrdering(board, moves, local_depth);
     //finding best move 
     for (const auto &move : moves)
     {

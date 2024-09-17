@@ -22,7 +22,7 @@ public:
     Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;};
     Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;};
     
-    Movelist moveOrdering(Board &board, Movelist &moves, int local_depth);
+    void moveOrdering(Board &board, Movelist &moves, int local_depth);
     Move iterative_deepening(Board &board);
 
     Move best(Board &board, int depth);
