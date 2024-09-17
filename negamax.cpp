@@ -7,7 +7,7 @@
 using namespace chess;
 
 #define CHECKMATE_SCORE 20000
-#define KILLER_MOVE INT16_MAX
+#define BEST_MOVE INT16_MAX
 #define CHECKMATE_MOVE INT16_MAX - 1
 #define CHECK_MOVE INT16_MAX - 2
 #define QUIET_MOVE INT16_MIN
@@ -39,7 +39,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         if (ttEntry.bestMove != Move())
         {
             if (auto move = std::find(moves.begin(), moves.end(), ttEntry.bestMove)){
-                move->setScore(KILLER_MOVE);
+                move->setScore(BEST_MOVE);
             }
         } 
     #endif
