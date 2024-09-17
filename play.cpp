@@ -2,6 +2,7 @@
 #include "negamax.h"
 #include "engine.h"
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include <typeinfo>
@@ -118,7 +119,9 @@ void uci_loop()
             }
             else if (option == "fen")
             {
-                
+                std::string line_fen; 
+                getline(is, line_fen);
+                engine.curr_board.get()->setFen(line_fen);
             }
         }
         else if (token == "newgame")
@@ -144,7 +147,7 @@ void uci_loop()
 }
 int main()
 {
-    testCheckmate();
+    //testCheckmate();
     uci_loop();
     return 0;
 }
