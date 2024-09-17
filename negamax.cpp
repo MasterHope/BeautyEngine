@@ -113,7 +113,9 @@ Move Negamax::best(Board &board, int local_depth)
             }
         #endif
         board.makeMove(move);
+        ply++;
         int evaluate = -best_priv(board, local_depth-1, alpha, beta);
+        ply--;
         board.unmakeMove(move);
         if (evaluate > bestEvaluation){
             bestMove = move;
@@ -137,9 +139,9 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     //handling checkmates...
     if (reason_result.first == GameResultReason::CHECKMATE){
         #ifdef LOGGING
-            std::clog << "Checkmate Detected" << std::endl;
+            std::clog << "Checkmate Detected at ply:" << ply<< std::endl;
         #endif
-        return -CHECKMATE_SCORE + local_depth; 
+        return -CHECKMATE_SCORE + ply; 
     }
     //repeating moves will return 0...
     if (reason_result.second == GameResult::DRAW){
@@ -218,8 +220,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
                 std::clog<<std::endl;
             }
         #endif
+        ply++;
         int value = -best_priv(board, local_depth - 1, -beta, -alpha);
         max_value = std::max(max_value, value);
+        ply--;
         board.unmakeMove(move);
         #ifdef PRUNING
             alpha = std::max(alpha, max_value);
@@ -261,6 +265,8 @@ Move Negamax::iterative_deepening(Board &board){
     Move best_move_until_now = Move();
     while (curr_depth <= this->depth){
         best_move_until_now = this->best(board, curr_depth);
+        //check if ply is at 0 as excepted
+        assert((this->ply==0, "Ply is not correctly updated"));
         //testing mate
         board.makeMove(best_move_until_now);
         if (board.isGameOver().first == GameResultReason::CHECKMATE){
