@@ -12,6 +12,7 @@ using namespace chess;
 #define CHECK_MOVE INT16_MAX - 2
 #define QUIET_MOVE INT16_MIN
 
+#define QUIESCIENCE_DEPTH 3
 
 //remove comment for seeing debugging...
 //#define LOGGING
@@ -21,6 +22,7 @@ using namespace chess;
 #define PRUNING
 //comment for removing move ordering
 #define MOVEORDERING 
+
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -32,8 +34,11 @@ std::string position(Color player, Square square_from, Square square_to){
     return pos;
 }
 //https://www.chessprogramming.org/Quiescence_Search
-int Negamax::quiescence(Board &board, int alpha, int beta){
+int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth){
     int stand_pat = this->model->eval(board);
+    if (quiescence_depth == 0){
+        return stand_pat;
+    }
     if( stand_pat >= beta )
         return beta;
     if( alpha < stand_pat )
@@ -41,9 +46,19 @@ int Negamax::quiescence(Board &board, int alpha, int beta){
     //Generating only capture moves...
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
+    //ordering captures
+    for (int i = 0; i < moves.size(); i++){
+        Move move = moves[i];
+        Piece pieceTo = board.at(move.to());
+        // calculating the value of the attack following MVV-LAA...
+        setScoreAttackingMove(board, move, pieceTo);
+    }
+    std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
+         { return a.score() > b.score(); });
+    
     for(const auto &move : moves)  {
         board.makeMove(move);
-        int score = -quiescence( board,-beta, -alpha );
+        int score = -quiescence( board,-beta, -alpha, quiescence_depth-1);
         board.unmakeMove(move);
         if( score >= beta )
             return beta;
@@ -92,11 +107,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         Piece pieceTo = board.at(move.to());
         if (pieceTo != Piece())
         {
-            int pieceFromIndex = int(board.at(move.from()).type());
-            int pieceToIndex = int(pieceTo.type());
-            // calculating the value of the attack following MVV-LAA...
-            int attacking_value =  piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
-            move.setScore(attacking_value);
+            setScoreAttackingMove(board, move, pieceTo);
             continue;
         }
         //return end if not found...
@@ -111,6 +122,14 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
     }
     std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
          { return a.score() > b.score(); });
+}
+void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo)
+{
+    int pieceFromIndex = int(board.at(move.from()).type());
+    int pieceToIndex = int(pieceTo.type());
+    // calculating the value of the attack following MVV-LAA...
+    int attacking_value = piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
+    move.setScore(attacking_value);
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
@@ -181,7 +200,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     } */
     if (local_depth == 0)
     {
-        int qs = this->quiescence(board, alpha, beta);
+        int qs = this->quiescence(board, alpha, beta, QUIESCIENCE_DEPTH);
         #ifdef LOGGING
             std::clog <<"Score = " << qs << std::endl;
         #endif
