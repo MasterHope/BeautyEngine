@@ -225,6 +225,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
             alpha = std::max(alpha, max_value);
             if (alpha >= beta)
             {
+                //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
                     history[position(board.sideToMove(), move.from(), move.to())] += local_depth *local_depth;
