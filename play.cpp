@@ -18,8 +18,9 @@ void testCheckmate()
     //mate in 3 moves... 8/8/5R2/8/4N2k/8/5K2/8 w - - 16 9
     //mate in 4 moves... 6k1/pp4p1/2p5/2P3K1/3P4/P1R2r2/1B2q3/8 b - - 0 39
     //mate in 5 moves 8/8/8/7R/8/2p2Pk1/2P1K3/8 w - - 1 7
+    //mate in 1 8/2B5/8/8/2k4p/K2b4/8/1q6 w - - 8 152
     //black is losing... 8/8/2n5/4k3/1R6/2K5/3N4/8 w - - 0 1
-    Board board = Board("3r2k1/pp4p1/2p3pn/2Pp2q1/3PPr2/P4B2/1B3P2/2RQ1R1K w - - 1 29");
+    Board board = Board("6k1/pp4p1/2p5/2P3K1/3P4/P1R2r2/1B2q3/8 b - - 0 39");
     // SimpleEvaluatingFunction modelSimple = SimpleEvaluatingFunction();
     PestoEvaluation modelSimple = PestoEvaluation();
     Evaluation *model = &modelSimple;

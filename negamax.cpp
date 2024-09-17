@@ -266,6 +266,14 @@ Move Negamax::iterative_deepening(Board &board){
     Move best_move_until_now = Move();
     while (curr_depth <= this->depth){
         best_move_until_now = this->best(board, curr_depth);
+        //testing mate
+        board.makeMove(best_move_until_now);
+        if (board.isGameOver().first == GameResultReason::CHECKMATE){
+            board.unmakeMove(best_move_until_now);
+            break;
+        }
+        board.unmakeMove(best_move_until_now);
+        //
         #ifdef LOGGING
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<< " for searching at depth: " << curr_depth <<std::endl;
         #endif
