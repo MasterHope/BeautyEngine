@@ -18,6 +18,7 @@ public:
     int numNodes;
     time_t time_start_search;
     int time_move_seconds;
+    std::atomic<bool> stop{false};
     Evaluation* model;
     std::unique_ptr<TranspositionTable> table = std::make_unique<TranspositionTable>();
     std::map<std::string, int> history = std::map<std::string, int>();

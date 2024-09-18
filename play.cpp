@@ -134,7 +134,9 @@ void uci_loop()
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
                 std::thread bestThread = std::thread(&Engine::go, &engine);
-                bestThread.join();
+                if (bestThread.joinable()){
+                    bestThread.join();
+                }
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
             }
