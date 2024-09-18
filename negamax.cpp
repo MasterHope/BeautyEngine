@@ -164,12 +164,6 @@ Move Negamax::best(Board &board, int local_depth)
     Move bestMove = Move();
 
     for (const auto &move : moves){
-        //like rice engine, check if stop every 2048 nodes...
-        if (numNodes % 2048 == 0){
-            if (stop || time_end()){
-                return 0;
-            }
-        }
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " " ;
             if (local_depth!=1){
@@ -199,12 +193,11 @@ Move Negamax::best(Board &board, int local_depth)
 }
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
 {
-    //break if ending time... (look every 2048 nodes like rice engine)
-    if (numNodes % 2048 == 0){
-            if (stop || time_end()){
-                return 0;
-            }
-        }
+    //break if ending time...)
+    if (stop || time_end()){
+        return 0;
+    }
+
     //check if we find a terminal state...
      std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
     //handling checkmates...
@@ -352,7 +345,7 @@ Move Negamax::iterative_deepening(Board &board){
     time(&time_start_search);
     Move best_move_until_now = Move();
     while (curr_depth <= this->depth){
-        if (time_end()){
+        if (stop || time_end()){
             break;
         }
         best_move_until_now = this->best(board, curr_depth);

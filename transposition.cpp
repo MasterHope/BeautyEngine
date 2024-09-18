@@ -5,7 +5,7 @@ using namespace chess;
 //logging
 //#define LOGGING_TT
 //cleaning if it is required...
-#define CLEANING
+//#define CLEANING
 void TranspositionTable::store(Board &board, TTEntry ttEntry){
     uint64_t index = this->hash(board);
     #ifdef CLEANING
