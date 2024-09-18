@@ -164,6 +164,9 @@ Move Negamax::best(Board &board, int local_depth)
     Move bestMove = Move();
 
     for (const auto &move : moves){
+        if (stop || time_end()){
+            return Move();
+        }
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " " ;
             if (local_depth!=1){
@@ -345,10 +348,12 @@ Move Negamax::iterative_deepening(Board &board){
     time(&time_start_search);
     Move best_move_until_now = Move();
     while (curr_depth <= this->depth){
-        if (stop || time_end()){
-            break;
-        }
-        best_move_until_now = this->best(board, curr_depth);
+        Move curr_move = this->best(board, curr_depth);
+        //It happens if time is over, it invalidates the last depth search.
+        if (curr_move == Move()) break;
+        best_move_until_now = curr_move; 
+        //always a move is there...
+        assert((best_move_until_now!=Move(), "Best move is empty"));
         //check if ply is at 0 as excepted
         assert((this->ply==0, "Ply is not correctly updated"));
         //testing mate
@@ -359,11 +364,11 @@ Move Negamax::iterative_deepening(Board &board){
         }
         board.unmakeMove(best_move_until_now);
         //
-        #ifdef LOGGING
-        std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<< " for searching at depth: " << curr_depth <<std::endl;
-        #endif
         curr_depth++;
     }
+    #ifdef LOGGING
+        std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<< " for searching at depth: " << curr_depth <<std::endl;
+    #endif
     curr_depth = 1;
     numNodes = 0;
     return best_move_until_now;
