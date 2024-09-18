@@ -131,6 +131,10 @@ void uci_loop()
         else if (token == "go")
         {
             is >> std::skipws >> token;
+            if (token=="movetime"){
+                is >> std::skipws >> token;
+                engine.setTime(atoi(token.c_str()));
+            }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
                 std::future<void> bestThread = std::async(std::launch::async, &Engine::go, &engine);

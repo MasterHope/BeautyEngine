@@ -23,6 +23,7 @@ class Engine{
         void stop(std::future<void>* bestThread);
         void quit() {};
         void make_move(Move move);
+        void setTime(int time){this->negamax.get()->time_move_seconds = time;};
 
 };
 #endif
