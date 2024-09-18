@@ -3,7 +3,7 @@
 #include "engine.h"
 #include <iostream>
 #include <string>
-#include <thread>
+#include <future>
 
 #include <typeinfo>
 #include "play.h"
@@ -133,10 +133,16 @@ void uci_loop()
             is >> std::skipws >> token;
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
-                std::thread bestThread = std::thread(&Engine::go, &engine);
-                if (bestThread.joinable()){
-                    bestThread.join();
-                }
+                std::future<void> bestThread = std::async(std::launch::async, &Engine::go, &engine);
+                /* while (true){     
+                    std::string stop;
+                    std::cin>>stop;
+                    if (stop == "stop"){
+                        engine.stop(&bestThread);
+                        break;
+                    }   
+                } */
+                bestThread.wait();
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
             }

@@ -2,6 +2,7 @@
 #include "evaluation.h"
 #include "negamax.h"
 #include "chess-library-master/include/chess.hpp"
+#include <future>
 using namespace chess;
 
 Engine::Engine()
@@ -25,5 +26,10 @@ void Engine::go(){
 
 void Engine::position(std::string& fen){
     this->curr_board->setFen(fen);
+}
+
+void Engine::stop(std::future<void>* bestThread){
+    this->negamax.get()->stop = true;
+    bestThread->wait();
 }
 
