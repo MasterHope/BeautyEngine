@@ -3,7 +3,7 @@
 #include<iostream>
 using namespace chess;
 //logging
-#define LOGGING_TT
+//#define LOGGING_TT
 //cleaning if it is required...
 #define CLEANING
 void TranspositionTable::store(Board &board, TTEntry ttEntry){

@@ -14,7 +14,7 @@ Engine::Engine()
                "go | start calculating for the given position\n"},
       best_move_last_iter(Move()), // Default initialization
       curr_board(std::make_unique<Board>()), // Use unique_ptr for Board
-      model(std::make_unique<SimpleEvaluatingFunction>()), // Use unique_ptr for Simple or Pesto...
+      model(std::make_unique<PestoEvaluation>()), // Use unique_ptr for Simple or Pesto...
       negamax(std::make_unique<Negamax>(6, model.get())) // Use unique_ptr for Negamax
 {
 }

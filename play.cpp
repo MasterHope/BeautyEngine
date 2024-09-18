@@ -84,7 +84,7 @@ void uci_loop()
 {
     std::string command, token;
     Engine engine = Engine();
-    while (std::getline(std::cin, command))
+     while (std::getline(std::cin, command))
     {
         std::istringstream is(command);
         token.clear();
@@ -133,7 +133,8 @@ void uci_loop()
             is >> std::skipws >> token;
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
-                engine.go();
+                std::thread bestThread = std::thread(&Engine::go, &engine);
+                bestThread.join();
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
             }
@@ -147,7 +148,7 @@ void uci_loop()
 }
 int main()
 {
-    testCheckmate();
+    //testEngine();
     uci_loop();
     return 0;
 }

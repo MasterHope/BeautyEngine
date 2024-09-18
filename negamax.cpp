@@ -30,7 +30,7 @@ using namespace chess;
 //comment for removing move ordering
 #define MOVEORDERING 
 //comment for removing quiescence
-#define QUIESCENCE
+//#define QUIESCENCE
 
 
 std::string position(Color player, Square square_from, Square square_to){
@@ -171,6 +171,7 @@ Move Negamax::best(Board &board, int local_depth)
             }
         #endif
         board.makeMove(move);
+        numNodes++;
         ply++;
         int evaluate = -best_priv(board, local_depth-1, alpha, beta);
         ply--;
@@ -192,6 +193,10 @@ Move Negamax::best(Board &board, int local_depth)
 }
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
 {
+    //break if ending time... (look every 2048 nodes like rice engine)
+    if (numNodes % 2048 == 0 && time_end()){
+        return 0;
+    }
     //check if we find a terminal state...
      std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
     //handling checkmates...
@@ -287,6 +292,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     for (const auto &move : moves)
     {
         board.makeMove(move);
+        numNodes++;
         #ifdef LOGGING
             std::clog<< std::string(curr_depth - local_depth, '.') << "Move executed:" <<chess::uci::moveToUci(move) << " ";
             if (local_depth!=1){
@@ -335,8 +341,12 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     return max_value;
 }
 Move Negamax::iterative_deepening(Board &board){
+    time(&time_start_search);
     Move best_move_until_now = Move();
     while (curr_depth <= this->depth){
+        if (time_end()){
+            break;
+        }
         best_move_until_now = this->best(board, curr_depth);
         //check if ply is at 0 as excepted
         assert((this->ply==0, "Ply is not correctly updated"));
@@ -354,5 +364,10 @@ Move Negamax::iterative_deepening(Board &board){
         curr_depth++;
     }
     curr_depth = 1;
+    numNodes = 0;
     return best_move_until_now;
+}
+
+bool Negamax::time_end(){
+    return (time(NULL) - time_start_search > time_move_seconds);
 }
