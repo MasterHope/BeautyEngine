@@ -27,6 +27,7 @@ public:
 private:
     int best_priv(Board &board, int depth, int alpha, int beta);
     std::pair<Move, int> best(Board &board, int depth);
+    void updateTranspositionTable(int local_depth, int bestEvaluation, const chess::Move &bestMove, chess::Board &board);
 };
 
 #endif

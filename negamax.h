@@ -32,7 +32,7 @@ public:
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
     bool time_end();
-    Move best(Board &board, int depth);
+    std::pair<Move, int> best(Board &board, int depth);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth);
 
 private:
