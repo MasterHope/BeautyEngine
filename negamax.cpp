@@ -14,11 +14,11 @@ using namespace chess;
 #define QUIET_MOVE INT16_MIN
 
 //Quiescience depth if enabled
-#define QUIESCIENCE_DEPTH 3
+#define QUIESCIENCE_DEPTH 4
 
 
 //remove comment for logging
-#define LOGGING
+//#define LOGGING
 //if you want the output of each tree...
 //#define LOGGING_DEPTH
 
@@ -31,7 +31,7 @@ using namespace chess;
 //comment for removing move ordering
 #define MOVEORDERING 
 //comment for removing quiescence
-//#define QUIESCENCE
+#define QUIESCENCE
 //remove comment for using IID
 //#define IID
 
@@ -47,6 +47,27 @@ std::string position(Color player, Square square_from, Square square_to){
 }
 //https://www.chessprogramming.org/Quiescence_Search
 int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth){
+    if (stop || time_end()){
+        return 0;
+    }
+    //base cases...
+    //check if we find a terminal state...
+     std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
+    //handling checkmates...
+    if (reason_result.first == GameResultReason::CHECKMATE){
+        #ifdef LOGGING_DEPTH
+            std::clog << "Checkmate Detected at ply:" << ply<< std::endl;
+        #endif
+        return -CHECKMATE_SCORE + ply; 
+    }
+    //repeating moves will return 0...
+    if (reason_result.second == GameResult::DRAW){
+        #ifdef LOGGING_DEPTH
+            std::clog << "0=DRAW" << std::endl;
+        #endif
+        return 0;
+    }
+
     //Generating only capture moves...
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
@@ -100,9 +121,11 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         //Internal Iterative Deepening...
         } else if (local_depth > 4){
             #ifdef IID
-                Move best = this->best(board, local_depth - 3).first;
+                Move best = this->best(board, local_depth/2).first;
                 #ifdef LOGGING
-                std::clog<<"Search IID with depth:" << local_depth-3 <<" completed" <<std::endl;
+                if(best != Move()){
+                    std::clog<<"Search IID with depth:" << local_depth-3 <<" completed" <<std::endl;
+                }
                 #endif
                 auto move_found = std::find(moves.begin(), moves.end(), best);
                 move_found->setScore(BEST_MOVE);
@@ -205,7 +228,46 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
     if (stop || time_end()){
         return 0;
     }
+    //find if a move is already calculated...
+    #if defined(TT) && defined(PRUNING)
+        int alphaOrigin = alpha;
+        // transposition table check if position already exists...
+        TTEntry ttEntry = table->lookup(board);
+        if (ttEntry.flag != EMPTY and ttEntry.depth >= local_depth)
+        {
+            //update the aging factor...
+            table->tt[board.zobrist() % TTSIZE].age = board.halfMoveClock();
+            // restore position
+            if (ttEntry.flag == EXACT)
+            {
+                #ifdef LOGGING_DEPTH
+                    std::clog <<"Score restored from transposition table = " << ttEntry.value << std::endl;
+                #endif
+                return ttEntry.value;
+            }
+            // restore alpha from LOWERBOUND node
+            else if (ttEntry.flag == LOWERBOUND)
+            {
+                alpha = std::max(alpha, ttEntry.value);
+            }
+            // restore beta from UPPERBOUND node
+            else if (ttEntry.flag == UPPERBOUND)
+            {
+                beta = std::min(beta, ttEntry.value);
+            }
+            // if alpha>=beta, than we could stop recursion...
+            if (alpha >= beta)
+            {
+                #ifdef LOGGING_DEPTH
+                    std::clog <<"Score restored from transposition table = -> alpha >= beta, cutoff: " << ttEntry.value << std::endl;
+                #endif
+                return ttEntry.value;
+            }  
+        }
+    #endif
 
+
+    //base cases...
     //check if we find a terminal state...
      std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
     //handling checkmates...
@@ -243,7 +305,8 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         #endif
         return value;
     }
-    //from rice engine: check mates...
+
+    //from rice engine: mate 
     //MATED IN
     alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
     //MATE IN
@@ -253,42 +316,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta)
         return alpha;
     }
 
-    #if defined(TT) && defined(PRUNING)
-        int alphaOrigin = alpha;
-        // transposition table check if position already exists...
-        TTEntry ttEntry = table->lookup(board);
-        if (ttEntry.flag != EMPTY and ttEntry.depth >= local_depth)
-        {
-            //update the aging factor...
-            table->tt[board.zobrist() % TTSIZE].age = board.halfMoveClock();
-            // restore position
-            if (ttEntry.flag == EXACT)
-            {
-                #ifdef LOGGING_DEPTH
-                    std::clog <<"Score restored from transposition table = " << ttEntry.value << std::endl;
-                #endif
-                return ttEntry.value;
-            }
-            // restore alpha from LOWERBOUND node
-            else if (ttEntry.flag == LOWERBOUND)
-            {
-                alpha = std::max(alpha, ttEntry.value);
-            }
-            // restore beta from UPPERBOUND node
-            else if (ttEntry.flag == UPPERBOUND)
-            {
-                beta = std::min(beta, ttEntry.value);
-            }
-            // if alpha>=beta, than we could stop recursion...
-            if (alpha >= beta)
-            {
-                #ifdef LOGGING_DEPTH
-                    std::clog <<"Score restored from transposition table = -> alpha >= beta, cutoff: " << ttEntry.value << std::endl;
-                #endif
-                return ttEntry.value;
-            }  
-        }
-    #endif
+
     // alpha beta main method...
     int max_value = INT_MIN;
     Movelist moves;
@@ -356,7 +384,10 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
         //It happens if time is over, it invalidates the last depth search.
-        if (curr_move_and_score.first == Move()) break;
+        if (curr_move_and_score.first == Move()) {
+            curr_depth++;
+            break;
+        }
         best_move_until_now = curr_move_and_score.first;
         best_move_score = curr_move_and_score.second; 
         //always a move is there...
@@ -370,9 +401,6 @@ Move Negamax::iterative_deepening(Board &board){
             break;
         }
         board.unmakeMove(best_move_until_now);
-         #ifdef LOGGING
-            std::clog<<"Search at depth "<<this->curr_depth << " completed" <<std::endl;
-        #endif
         curr_depth++;
     }
     #ifdef LOGGING
