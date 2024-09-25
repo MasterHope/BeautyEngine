@@ -189,15 +189,16 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
     #endif
-    int alpha, beta, ply, evaluate, numNodes;
-    #pragma omp parallel private(alpha,beta,evaluate,board,numNodes,ply,local_depth) shared(table, moves)
+    int alpha, beta, ply, evaluate, numNodes, thread_depth;
+    #pragma omp parallel private(alpha,beta,evaluate,board,numNodes,ply,thread_depth) shared(table, moves)
     {
+        thread_depth = local_depth;
         alpha = INT_MIN;
         beta = INT_MAX;
         evaluate = INT_MIN;
         numNodes = 0;
         ply = 0;
-        #pragma omp for nowait
+        #pragma omp for
             for (int i = 0; i < moves.size(); i++){
                 board.makeMove(moves[i]);
                 numNodes++;

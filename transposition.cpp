@@ -43,8 +43,11 @@ void TranspositionTable::cleanUp(uint32_t clock){
         TTEntry ttEntry = tt[i];
         if (ttEntry.flag != EMPTY){
             if (ttEntry.age < clock){
-                tt[i] = TTEntry();
-                num_elements--;
+                #pragma omp critical
+                {
+                    tt[i] = TTEntry();
+                    num_elements--;
+                }
                 if (num_elements <= init_element * 0.40){
                     return;
                 }
