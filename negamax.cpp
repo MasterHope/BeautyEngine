@@ -189,26 +189,28 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
     #endif
-    int alpha = INT_MIN;
-    int beta = INT_MAX;
-    int evaluate = INT_MIN;
-    int numNodes = 0;
-    int ply = 0;
+    int alpha, beta, ply, evaluate, numNodes;
     #pragma omp parallel private(alpha,beta,evaluate,board,numNodes,ply,local_depth) shared(table, moves)
     {
-        for (int i = 0; i < moves.size(); i++){
-            Move move = moves[i];
-            board.makeMove(move);
-            numNodes++;
-            ply++;
-            evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply);
-            move.setScore(evaluate);
-            #ifdef LOGGING
-                std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
-            #endif
-            ply--;
-            board.unmakeMove(move);
-        }
+        alpha = INT_MIN;
+        beta = INT_MAX;
+        evaluate = INT_MIN;
+        numNodes = 0;
+        ply = 0;
+        #pragma omp for nowait
+            for (int i = 0; i < moves.size(); i++){
+                board.makeMove(moves[i]);
+                numNodes++;
+                ply++;
+                //problem is here...
+                evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply);
+                moves[i].setScore(evaluate);
+                #ifdef LOGGING
+                    std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
+                #endif
+                ply--;
+                board.unmakeMove(moves[i]);
+            }
     }
     //looking for best move...
     Move bestMove = Move();
