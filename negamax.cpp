@@ -397,7 +397,7 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
         //It happens if time is over, it invalidates the last depth search.
-        if (curr_move_and_score.first == Move()) {
+        if (stop || time_end()) {
             curr_depth++;
             break;
         }
