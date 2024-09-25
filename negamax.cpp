@@ -418,6 +418,7 @@ Move Negamax::iterative_deepening(Board &board){
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
     #endif
     curr_depth = 1;
+    
     return best_move_until_now;
 }
 

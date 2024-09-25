@@ -45,6 +45,8 @@ void play(chess::Board &board, Negamax &negamax)
     }
 }
 
+
+
 void uci_loop()
 {
     std::string command, token;
@@ -102,15 +104,8 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
+                //thread doing search
                 std::future<void> bestThread = std::async(std::launch::async, &Engine::go, &engine);
-                /* while (true){     
-                    std::string stop;
-                    std::cin>>stop;
-                    if (stop == "stop"){
-                        engine.stop(&bestThread);
-                        break;
-                    }   
-                } */
                 bestThread.wait();
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
@@ -123,6 +118,8 @@ void uci_loop()
         }
     }
 }
+
+
 int main()
 {
     //testEngine();

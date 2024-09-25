@@ -16,7 +16,7 @@ Engine::Engine()
       best_move_last_iter(Move()), // Default initialization
       curr_board(std::make_shared<Board>()), 
       model(std::make_shared<PestoEvaluation>()), 
-      negamax(std::make_shared<Negamax>(1000, model.get())) 
+      negamax(std::make_shared<Negamax>(7, model.get()))
 {
 }
 void Engine::go(){
@@ -28,8 +28,5 @@ void Engine::position(std::string& fen){
     this->curr_board->setFen(fen);
 }
 
-void Engine::stop(std::future<void>* bestThread){
-    this->negamax.get()->stop = true;
-    bestThread->wait();
-}
+
 

@@ -3,7 +3,6 @@
 #include "chess-library-master/include/chess.hpp"
 #include "negamax.h"
 #include <string>
-#include <future>
 
 using namespace chess;
 
@@ -20,7 +19,6 @@ class Engine{
         Engine();
         void position(std::string& fen);
         void go();
-        void stop(std::future<void>* bestThread);
         void quit() {};
         void make_move(Move move);
         void setTime(int timems){this->negamax.get()->time_move_seconds = timems/1000;};
