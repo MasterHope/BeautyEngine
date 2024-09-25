@@ -190,27 +190,29 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     this->moveOrdering(board, moves, local_depth);
     #endif
     int alpha, beta, ply, evaluate, numNodes, thread_depth;
-    #pragma omp parallel private(alpha,beta,evaluate,board,numNodes,ply,thread_depth) shared(table, moves)
+    Board threadBoard;
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
     {
+        threadBoard = board;
         thread_depth = local_depth;
         alpha = INT_MIN;
         beta = INT_MAX;
         evaluate = INT_MIN;
         numNodes = 0;
         ply = 0;
-        #pragma omp for
+        #pragma omp for nowait
             for (int i = 0; i < moves.size(); i++){
-                board.makeMove(moves[i]);
+                threadBoard.makeMove(moves[i]);
                 numNodes++;
                 ply++;
                 //problem is here...
-                evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply);
+                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
                     std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
                 #endif
                 ply--;
-                board.unmakeMove(moves[i]);
+                threadBoard.unmakeMove(moves[i]);
             }
     }
     //looking for best move...
