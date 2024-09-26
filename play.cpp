@@ -129,8 +129,6 @@ void uci_loop()
 
 int main()
 {
-    isThereAMajorPiece();
-    //testEngine();
     uci_loop();
     return 0;
 }

@@ -33,9 +33,9 @@ using namespace chess;
 #define MOVEORDERING 
 //comment for removing quiescence
 #define QUIESCENCE
-//remove comment for using IID
+// comment for removing IID
 #define IID
-//comment for using nullmove pruning
+//comment for removing nullmove pruning
 #define NULLMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
@@ -121,12 +121,12 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
                 move->setScore(BEST_MOVE);
             }
         //Internal Iterative Deepening...
-        } else if (local_depth > 3){
+        } else if (local_depth > 2){
             #ifdef IID
                 Move best = this->best(board, local_depth/2).first;
                 #ifdef LOGGING
                 if(best != Move()){
-                    std::clog<<"Search IID with depth:" << local_depth-3 <<" completed" <<std::endl;
+                    std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
                 }
                 #endif
                 auto move_found = std::find(moves.begin(), moves.end(), best);
@@ -193,8 +193,8 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
-    {
+    /* #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
+    { */
         threadBoard = board;
         thread_depth = local_depth;
         alpha = INT_MIN;
@@ -202,7 +202,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
         evaluate = INT_MIN;
         numNodes = 0;
         ply = 0;
-        #pragma omp for nowait
+        /* #pragma omp for nowait */
             for (int i = 0; i < moves.size(); i++){
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
@@ -216,7 +216,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 ply--;
                 threadBoard.unmakeMove(moves[i]);
             }
-    }
+    /* } */
     //looking for best move...
     Move bestMove = Move();
     int bestEvaluation = INT_MIN;
@@ -245,9 +245,9 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     }
     //first try not to move if possible...
     #ifdef NULLMOVE
-    if (isThereAMajorPiece(board) && local_depth > 2 && !board.inCheck()){
+    if (!board.inCheck() && local_depth > 2 && isThereAMajorPiece(board)){
         board.makeNullMove();
-        int eval = -best_priv(board, local_depth - 3, -beta, -alpha, numNodes, ply);
+        int eval = -best_priv(board, local_depth/2, -beta, -alpha, numNodes, ply);
         board.unmakeNullMove();
         if (stop || time_end()){
             return 0;
@@ -425,8 +425,6 @@ Move Negamax::iterative_deepening(Board &board){
         }
         best_move_until_now = curr_move_and_score.first;
         best_move_score = curr_move_and_score.second; 
-        //always a move is there...
-        assert((best_move_until_now!=Move(), "Best move is empty"));
         //testing mate
         board.makeMove(best_move_until_now);
         if (board.isGameOver().first == GameResultReason::CHECKMATE){
@@ -436,9 +434,12 @@ Move Negamax::iterative_deepening(Board &board){
         board.unmakeMove(best_move_until_now);
         curr_depth++;
     }
+    //always a move is there...
+    assert((best_move_until_now!=Move(), "Best move is empty"));
     #ifdef LOGGING
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
     #endif
+    curr_depth = 1;
     return best_move_until_now;
 }
 
