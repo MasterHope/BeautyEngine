@@ -34,7 +34,7 @@ using namespace chess;
 //comment for removing quiescence
 #define QUIESCENCE
 //remove comment for using IID
-//#define IID
+#define IID
 //comment for using nullmove pruning
 #define NULLMOVE
 
@@ -121,7 +121,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
                 move->setScore(BEST_MOVE);
             }
         //Internal Iterative Deepening...
-        } else if (local_depth > 4){
+        } else if (local_depth > 3){
             #ifdef IID
                 Move best = this->best(board, local_depth/2).first;
                 #ifdef LOGGING
