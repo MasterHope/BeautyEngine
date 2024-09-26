@@ -35,7 +35,7 @@ public:
     bool isThereAMajorPiece(Board &board);
 
 private:
-    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply, bool null_move_pruning);
+    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply);
     
 };
 

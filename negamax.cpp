@@ -35,6 +35,8 @@ using namespace chess;
 #define QUIESCENCE
 //remove comment for using IID
 //#define IID
+//comment for using nullmove pruning
+#define NULLMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -206,7 +208,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 numNodes++;
                 ply++;
                 //problem is here...
-                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply, false);
+                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
                     std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
@@ -235,12 +237,32 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     return std::make_pair(bestMove, bestEvaluation);
 }
-int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply, bool move_null_pruning)
+int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply)
 {
     //break if ending time...)
     if (stop || time_end()){
         return 0;
     }
+    //first try not to move if possible...
+    #ifdef NULLMOVE
+    if (isThereAMajorPiece(board) && local_depth > 2 && !board.inCheck()){
+        board.makeNullMove();
+        int eval = -best_priv(board, local_depth - 3, -beta, -alpha, numNodes, ply);
+        board.unmakeNullMove();
+        if (stop || time_end()){
+            return 0;
+        }
+        //from rice engine
+        if (eval >= beta){
+            //it could be a false mate, so we avoid to return it...
+            if (eval > CHECKMATE_SCORE){
+                eval = beta;
+            }
+            return eval;
+        }
+    }
+    #endif
+
     //find if a move is already calculated...
     #if defined(TT) && defined(PRUNING)
         int alphaOrigin = alpha;
@@ -350,7 +372,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             }
         #endif
         ply++;
-        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply, false);
+        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply);
         max_value = std::max(max_value, value);
         ply--;
         board.unmakeMove(move);
