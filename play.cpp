@@ -22,7 +22,14 @@ using namespace chess;
 //black is losing... 8/8/2n5/4k3/1R6/2K5/3N4/8 w - - 0 1
 //free exchange rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2
 //a lot of changes... 4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1
+//no main pieces present...8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8
     
+
+void isThereAMajorPiece(){
+    Engine engine = Engine();
+    engine.curr_board.get()->setFen("8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8");
+    std::cout<<engine.negamax.get()->isThereAMajorPiece(*engine.curr_board)<<std::endl;
+}
 
 void testEngine(){
     Engine engine = Engine();
@@ -122,6 +129,7 @@ void uci_loop()
 
 int main()
 {
+    isThereAMajorPiece();
     //testEngine();
     uci_loop();
     return 0;

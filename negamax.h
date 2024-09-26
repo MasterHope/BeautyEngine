@@ -32,9 +32,10 @@ public:
     bool time_end();
     std::pair<Move, int> best(Board &board, int depth);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply);
+    bool isThereAMajorPiece(Board &board);
 
 private:
-    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply);
+    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply, bool null_move_pruning);
     
 };
 

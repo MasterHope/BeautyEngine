@@ -206,7 +206,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 numNodes++;
                 ply++;
                 //problem is here...
-                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
+                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply, false);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
                     std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
@@ -235,7 +235,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     return std::make_pair(bestMove, bestEvaluation);
 }
-int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply)
+int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply, bool move_null_pruning)
 {
     //break if ending time...)
     if (stop || time_end()){
@@ -350,7 +350,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             }
         #endif
         ply++;
-        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply);
+        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply, false);
         max_value = std::max(max_value, value);
         ply--;
         board.unmakeMove(move);
@@ -417,11 +417,18 @@ Move Negamax::iterative_deepening(Board &board){
     #ifdef LOGGING
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
     #endif
-    curr_depth = 1;
-    
     return best_move_until_now;
 }
 
 bool Negamax::time_end(){
     return (time(NULL) - time_start_search > time_move_seconds);
+}
+
+bool Negamax::isThereAMajorPiece(Board &board){
+    uint64_t all_bitboard = 0;
+    for (uint8_t piece = int(PieceType::KNIGHT); piece < int(PieceType::KING); piece++){
+        PieceType p = PieceType(chess::PieceType::underlying(piece));
+        all_bitboard = all_bitboard ^ board.pieces(p).getBits();
+    }
+    return all_bitboard != 0;
 }
