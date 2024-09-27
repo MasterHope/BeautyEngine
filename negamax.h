@@ -29,6 +29,7 @@ public:
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
+    bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
     bool time_end();
     std::pair<Move, int> best(Board &board, int depth);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply);

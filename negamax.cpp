@@ -19,7 +19,7 @@ using namespace chess;
 
 
 //remove comment for logging
-//#define LOGGING
+#define LOGGING
 //if you want the output of each tree...
 //#define LOGGING_DEPTH
 
@@ -34,7 +34,7 @@ using namespace chess;
 //comment for removing quiescence
 #define QUIESCENCE
 // comment for removing IID
-#define IID
+//#define IID
 //comment for removing nullmove pruning
 #define NULLMOVE
 
@@ -172,6 +172,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
     }
     std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
          { return a.score() > b.score(); });
+    assert((moves[0].score()==BEST_MOVE,"Error best move is not on the front of the list..."));
 }
 void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo)
 {
@@ -211,7 +212,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
-                    std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(move) << " Score=" << evaluate <<std::endl;
+                    std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
                 #endif
                 ply--;
                 threadBoard.unmakeMove(moves[i]);
@@ -426,12 +427,10 @@ Move Negamax::iterative_deepening(Board &board){
         best_move_until_now = curr_move_and_score.first;
         best_move_score = curr_move_and_score.second; 
         //testing mate
-        board.makeMove(best_move_until_now);
-        if (board.isGameOver().first == GameResultReason::CHECKMATE){
-            board.unmakeMove(best_move_until_now);
+        if (isBestMoveMate(board, best_move_until_now)){
+            curr_depth++;
             break;
-        }
-        board.unmakeMove(best_move_until_now);
+        } 
         curr_depth++;
     }
     //always a move is there...
@@ -441,6 +440,18 @@ Move Negamax::iterative_deepening(Board &board){
     #endif
     curr_depth = 1;
     return best_move_until_now;
+}
+
+bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now)
+{
+    board.makeMove(best_move_until_now);
+    if (board.isGameOver().first == GameResultReason::CHECKMATE)
+    {
+        board.unmakeMove(best_move_until_now);
+        return true;
+    }
+    board.unmakeMove(best_move_until_now);
+    return false;
 }
 
 bool Negamax::time_end(){
