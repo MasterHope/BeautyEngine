@@ -194,8 +194,8 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes, thread_depth;
     Board threadBoard;
-    /* #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
-    { */
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
+    {
         threadBoard = board;
         thread_depth = local_depth;
         alpha = INT_MIN;
@@ -203,7 +203,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
         evaluate = INT_MIN;
         numNodes = 0;
         ply = 0;
-        /* #pragma omp for nowait */
+        #pragma omp for nowait
             for (int i = 0; i < moves.size(); i++){
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
@@ -217,7 +217,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 ply--;
                 threadBoard.unmakeMove(moves[i]);
             }
-    /* } */
+    }
     //looking for best move...
     Move bestMove = Move();
     int bestEvaluation = INT_MIN;
