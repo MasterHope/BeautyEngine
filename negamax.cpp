@@ -37,6 +37,8 @@ using namespace chess;
 #define IID
 //comment for removing nullmove pruning
 #define NULLMOVE
+//comment for removing time...
+#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -49,9 +51,11 @@ std::string position(Color player, Square square_from, Square square_to){
 }
 //https://www.chessprogramming.org/Quiescence_Search
 int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply){
+    #ifdef TIMEMOVE
     if (stop || time_end()){
         return 0;
     }
+    #endif
     //base cases...
     //check if we find a terminal state...
      std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
@@ -241,9 +245,11 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply)
 {
     //break if ending time...)
+    #ifdef TIMEMOVE
     if (stop || time_end()){
         return 0;
     }
+    #endif
 
     //find if a move is already calculated...
     #if defined(TT) && defined(PRUNING)
@@ -341,9 +347,11 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         board.makeNullMove();
         int eval = -best_priv(board, local_depth/2, -beta, -alpha, numNodes, ply);
         board.unmakeNullMove();
+        #ifdef TIMEMOVE
         if (stop || time_end()){
             return 0;
         }
+        #endif
         //from rice engine
         if (eval >= beta){
             //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
@@ -421,10 +429,12 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
         //It happens if time is over, it invalidates the last depth search.
+        #ifdef TIMEMOVE
         if (stop || time_end()) {
             curr_depth++;
             break;
         }
+        #endif
         best_move_until_now = curr_move_and_score.first;
         best_move_score = curr_move_and_score.second; 
         //testing mate
