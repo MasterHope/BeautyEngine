@@ -466,7 +466,8 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 }
 
 bool Negamax::time_end(){
-    return (time(NULL) - time_start_search > time_move_seconds);
+    //-1 because we have some overhead depending on openmp
+    return (time(NULL) - time_start_search > time_move_seconds - 1);
 }
 
 bool Negamax::isThereAMajorPiece(Board &board){
