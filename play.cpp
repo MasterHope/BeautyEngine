@@ -33,7 +33,7 @@ void isThereAMajorPiece(){
 
 void testEngine(){
     Engine engine = Engine();
-    engine.curr_board.get()->setFen("4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1");
+    engine.curr_board.get()->setFen("8/8/5R2/8/4N2k/5K2/8/8 b - - 17 9");
     while (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE){
         engine.go();
         std::cout<<engine.best_move_last_iter<<std::endl;
@@ -129,6 +129,7 @@ void uci_loop()
 
 int main()
 {
+    testEngine();
     uci_loop();
     return 0;
 }

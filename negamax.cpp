@@ -254,8 +254,8 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         }
         //from rice engine
         if (eval >= beta){
-            //it could be a false mate, so we avoid to return it...
-            if (eval > CHECKMATE_SCORE){
+            //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
+            if (eval > CHECKMATE_SCORE - 100){
                 eval = beta;
             }
             return eval;
