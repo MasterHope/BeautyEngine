@@ -10,9 +10,11 @@ using namespace chess;
 //score for move ordering
 #define CHECKMATE_SCORE 200000
 #define BEST_MOVE INT16_MAX
-#define CHECKMATE_MOVE INT16_MAX - 1
-#define CHECK_MOVE INT16_MAX - 2
-#define QUIET_MOVE INT16_MIN
+#define KILLER_MOVE INT16_MAX - 1
+#define CHECKMATE_MOVE INT16_MAX - 2
+#define CHECK_MOVE INT16_MAX - 3
+#define ATTACK_MOVE 3000
+#define HISTORY_MOVE 1000
 
 //Quiescience depth if enabled
 #define QUIESCIENCE_DEPTH 4
@@ -38,7 +40,7 @@ using namespace chess;
 //comment for removing nullmove pruning
 #define NULLMOVE
 //comment for removing time...
-#define TIMEMOVE
+//#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -119,13 +121,8 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
 {
     #ifdef TT
         TTEntry ttEntry = table->lookup(board);
-        // best move from previous iteration...
-        if (ttEntry.bestMove != Move()){
-            if (auto move = std::find(moves.begin(), moves.end(), ttEntry.bestMove)){
-                move->setScore(BEST_MOVE);
-            }
-        //Internal Iterative Deepening...
-        } else if (local_depth > 5){
+        //Internal Iterative Deepening... if no best move found...
+        if (ttEntry.bestMove == Move() && local_depth > 5){
             #ifdef IID
                 Move best = this->best(board, local_depth/2).first;
                 #ifdef LOGGING
@@ -133,46 +130,48 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
                     std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
                 }
                 #endif
-                auto move_found = std::find(moves.begin(), moves.end(), best);
-                move_found->setScore(BEST_MOVE);
             #endif
         }
-       
     #endif
     for (int i = 0; i < moves.size(); i++)
     {
-        Move move = moves[i];
         #ifdef TT
-        if (move == ttEntry.bestMove){
+        //best move
+        if (moves[i] == ttEntry.bestMove){
+            moves[i].setScore(BEST_MOVE);
             continue;
         }
         #endif
+        //killer moves
+        if (killer_moves[depth].first == moves[i] || killer_moves[depth].second == moves[i]){
+            moves[i].setScore(KILLER_MOVE);
+        }
         //add check moves first...
-        board.makeMove(move);
+        board.makeMove(moves[i]);
         if (board.inCheck()){
             int eval = board.isGameOver().first == GameResultReason::CHECKMATE ? CHECKMATE_MOVE : CHECK_MOVE;
-            move.setScore(eval);
-            board.unmakeMove(move);
+            moves[i].setScore(eval);
+            board.unmakeMove(moves[i]);
             continue;       
         }
         //reset...
-        board.unmakeMove(move);
+        board.unmakeMove(moves[i]);
         // attacking moves...
-        Piece pieceTo = board.at(move.to());
+        Piece pieceTo = board.at(moves[i].to());
         if (pieceTo != Piece())
         {
-            setScoreAttackingMove(board, move, pieceTo);
+            setScoreAttackingMove(board, moves[i], pieceTo);
             continue;
         }
         //return end if not found...
         #ifdef PRUNING
-            std::map<std::string, int>::iterator it = history.find(position(board.sideToMove(), move.from(), move.to()));
+            std::map<std::string, int>::iterator it = history.find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
             if (it !=history.end()){
-                move.setScore(it->second);
+                moves[i].setScore(it->second + HISTORY_MOVE);
                 continue;
             }
         #endif
-        move.setScore(QUIET_MOVE);
+        //quiet moves valuation
     }
     std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
          { return a.score() > b.score(); });
@@ -184,7 +183,11 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
     int pieceToIndex = int(pieceTo.type());
     // calculating the value of the attack following MVV-LAA...
     int attacking_value = piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
-    move.setScore(attacking_value);
+    if (attacking_value < 0 ){
+        move.setScore(INT16_MIN);
+    } else {
+        move.setScore(attacking_value + ATTACK_MOVE);
+    }
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
@@ -364,6 +367,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     #endif
 
     int max_value = INT_MIN;
+    Move best_move = Move();
     Movelist moves;
     movegen::legalmoves(moves, board);
     //move_ordering if def
@@ -383,13 +387,26 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         #endif
         ply++;
         int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply);
+        //update best move
+        if (value > max_value){
+            best_move = move;
+        }
         max_value = std::max(max_value, value);
         ply--;
         board.unmakeMove(move);
+        //update alpha bound... (best move of player alpha)
+        alpha = std::max(alpha, max_value);
         #ifdef PRUNING
-            alpha = std::max(alpha, max_value);
+            //that means that the position must not be explored further...
             if (alpha >= beta)
             {
+                //add move to killer moves...
+                if (killer_moves[ply].first != Move()){
+                    killer_moves[ply].second = move;
+                //I could save two killer moves max...
+                } else {
+                    killer_moves[ply].first = move;
+                }
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
@@ -414,6 +431,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         else
         {
             ttEntry.flag = EXACT;
+            ttEntry.bestMove = best_move;
         }
         ttEntry.depth = local_depth;
         ttEntry.hash = board.hash();
@@ -450,6 +468,7 @@ Move Negamax::iterative_deepening(Board &board){
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
     #endif
     curr_depth = 1;
+    killer_moves = std::map<int, std::pair<Move, Move>>();
     return best_move_until_now;
 }
 

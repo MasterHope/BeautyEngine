@@ -20,6 +20,7 @@ public:
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
     std::map<std::string, int> history = std::map<std::string, int>();
+    std::map<int, std::pair<Move,Move>> killer_moves = std::map<int, std::pair<Move,Move>>();
     
 
 public:
