@@ -40,7 +40,7 @@ using namespace chess;
 //comment for removing nullmove pruning
 #define NULLMOVE
 //comment for removing time...
-//#define TIMEMOVE
+#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
