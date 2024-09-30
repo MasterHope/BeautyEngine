@@ -400,15 +400,15 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             //that means that the position must not be explored further...
             if (alpha >= beta)
             {
-                //add move to killer moves...
-                if (killer_moves[ply].first != Move()){
-                    killer_moves[ply].second = move;
-                //I could save two killer moves max...
-                } else {
-                    killer_moves[ply].first = move;
-                }
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
+                    //add move to killer moves...
+                    if (killer_moves[ply].first != Move()){
+                        killer_moves[ply].second = move;
+                    //I could save two killer moves max...
+                    } else {
+                        killer_moves[ply].first = move;
+                    }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
                     history[position(board.sideToMove(), move.from(), move.to())] += local_depth *local_depth;
                 }
