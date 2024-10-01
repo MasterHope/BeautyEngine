@@ -141,7 +141,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         }
         #endif
         //killer moves
-        if (killer_moves[depth].first == moves[i] || killer_moves[depth].second == moves[i]){
+        if (killer_moves[local_depth].first == moves[i] || killer_moves[local_depth].second == moves[i]){
             moves[i].setScore(KILLER_MOVE);
         }
         //add check moves first...
@@ -213,7 +213,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
                 ply++;
-                evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
+                evaluate = -best_priv(threadBoard, thread_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
                     std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
@@ -234,7 +234,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     }
     #ifdef TT
         TTEntry ttEntry;
-        ttEntry.depth = curr_depth;
+        ttEntry.depth = local_depth;
         ttEntry.value = bestEvaluation;
         ttEntry.bestMove = bestMove;
         ttEntry.age = board.halfMoveClock();
@@ -259,7 +259,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         if (ttEntry.flag != EMPTY)
         {
             //update the aging factor...
-            table->tt[board.zobrist() % TTSIZE].age = board.halfMoveClock();
+            #pragma omp critical
+            {
+            table->tt[board.hash() % TTSIZE].age = board.halfMoveClock();
+            }
             // restore position
             if (ttEntry.flag == EXACT)
             {
@@ -365,8 +368,8 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         //update best move
         if (value > max_value){
             best_move = move;
+            max_value = value;
         }
-        max_value = std::max(max_value, value);
         ply--;
         board.unmakeMove(move);
         //update alpha bound... (best move of player alpha)
@@ -378,11 +381,11 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //add move to killer moves...
-                    if (killer_moves[ply].first != Move()){
-                        killer_moves[ply].second = move;
+                    if (killer_moves[local_depth].first != Move()){
+                        killer_moves[local_depth].second = move;
                     //I could save two killer moves max...
                     } else {
-                        killer_moves[ply].first = move;
+                        killer_moves[local_depth].first = move;
                     }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
                     history[position(board.sideToMove(), move.from(), move.to())] += local_depth *local_depth;
@@ -408,7 +411,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             ttEntry.flag = EXACT;
             ttEntry.bestMove = best_move;
         }
-        ttEntry.depth = ply;
+        ttEntry.depth = local_depth;
         ttEntry.hash = board.hash();
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
