@@ -170,6 +170,9 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
             }
         #endif
         //quiet moves valuation
+        board.makeMove(moves[i]);
+        moves[i].setScore(model->eval(board));
+        board.unmakeMove(moves[i]);
     }
     std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
          { return a.score() > b.score(); });
