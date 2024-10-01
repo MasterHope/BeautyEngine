@@ -37,10 +37,8 @@ using namespace chess;
 #define QUIESCENCE
 // comment for removing IID
 #define IID
-//comment for removing nullmove pruning
-#define NULLMOVE
 //comment for removing time...
-//#define TIMEMOVE
+#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -215,7 +213,6 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
                 ply++;
-                //problem is here...
                 evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
@@ -237,7 +234,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     }
     #ifdef TT
         TTEntry ttEntry;
-        ttEntry.depth = local_depth;
+        ttEntry.depth = curr_depth;
         ttEntry.value = bestEvaluation;
         ttEntry.bestMove = bestMove;
         ttEntry.age = board.halfMoveClock();
@@ -259,7 +256,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         int alphaOrigin = alpha;
         // transposition table check if position already exists...
         TTEntry ttEntry = table->lookup(board);
-        if (ttEntry.flag != EMPTY and ttEntry.depth >= local_depth)
+        if (ttEntry.flag != EMPTY)
         {
             //update the aging factor...
             table->tt[board.zobrist() % TTSIZE].age = board.halfMoveClock();
@@ -344,28 +341,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
 
 
     // alpha beta main method...
-    //first try not to move if possible... it could save time during search...
-    #ifdef NULLMOVE
-    if (!board.inCheck() && local_depth > 2 && isThereAMajorPiece(board)){
-        board.makeNullMove();
-        int eval = -best_priv(board, local_depth/2, -beta, -alpha, numNodes, ply);
-        board.unmakeNullMove();
-        #ifdef TIMEMOVE
-        if (stop || time_end()){
-            return 0;
-        }
-        #endif
-        //from rice engine
-        if (eval >= beta){
-            //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
-            if (eval > CHECKMATE_SCORE - 100){
-                eval = beta;
-            }
-            return eval;
-        }
-    }
-    #endif
-
     int max_value = INT_MIN;
     Move best_move = Move();
     Movelist moves;
@@ -400,15 +375,15 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             //that means that the position must not be explored further...
             if (alpha >= beta)
             {
-                //add move to killer moves...
-                if (killer_moves[ply].first != Move()){
-                    killer_moves[ply].second = move;
-                //I could save two killer moves max...
-                } else {
-                    killer_moves[ply].first = move;
-                }
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
+                    //add move to killer moves...
+                    if (killer_moves[ply].first != Move()){
+                        killer_moves[ply].second = move;
+                    //I could save two killer moves max...
+                    } else {
+                        killer_moves[ply].first = move;
+                    }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
                     history[position(board.sideToMove(), move.from(), move.to())] += local_depth *local_depth;
                 }
@@ -433,7 +408,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             ttEntry.flag = EXACT;
             ttEntry.bestMove = best_move;
         }
-        ttEntry.depth = local_depth;
+        ttEntry.depth = ply;
         ttEntry.hash = board.hash();
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
@@ -485,8 +460,7 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 }
 
 bool Negamax::time_end(){
-    //-1 because we have some overhead depending on openmp
-    return (time(NULL) - time_start_search > time_move_seconds - 1);
+    return (time(NULL) - time_start_search > time_move_seconds);
 }
 
 bool Negamax::isThereAMajorPiece(Board &board){
