@@ -10,10 +10,10 @@ using namespace chess;
 //score for move ordering
 #define CHECKMATE_SCORE 200000
 #define BEST_MOVE INT16_MAX
-#define KILLER_MOVE INT16_MAX - 1
-#define CHECKMATE_MOVE INT16_MAX - 2
-#define CHECK_MOVE INT16_MAX - 3
+#define CHECKMATE_MOVE INT16_MAX - 1
+#define CHECK_MOVE INT16_MAX - 2
 #define ATTACK_MOVE 3000
+#define KILLER_MOVE 2000
 #define HISTORY_MOVE 1000
 
 //Quiescience depth if enabled
@@ -181,11 +181,7 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
     int pieceToIndex = int(pieceTo.type());
     // calculating the value of the attack following MVV-LAA...
     int attacking_value = piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
-    if (attacking_value < 0 ){
-        move.setScore(INT16_MIN);
-    } else {
-        move.setScore(attacking_value + ATTACK_MOVE);
-    }
+    move.setScore(attacking_value + ATTACK_MOVE);
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
@@ -356,6 +352,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     for (const auto &move : moves)
     {
         board.makeMove(move);
+        
         numNodes++;
         #ifdef LOGGING_DEPTH
             std::clog<< std::string(curr_depth - local_depth, '.') << "Move executed:" <<chess::uci::moveToUci(move) << " ";
