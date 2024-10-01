@@ -37,8 +37,6 @@ using namespace chess;
 #define QUIESCENCE
 // comment for removing IID
 #define IID
-//comment for removing nullmove pruning
-#define NULLMOVE
 //comment for removing time...
 #define TIMEMOVE
 
@@ -215,7 +213,6 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
                 ply++;
-                //problem is here...
                 evaluate = -best_priv(threadBoard, local_depth-1, alpha, beta, numNodes, ply);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
@@ -344,28 +341,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
 
 
     // alpha beta main method...
-    //first try not to move if possible... it could save time during search...
-    #ifdef NULLMOVE
-    if (!board.inCheck() && local_depth > 2 && isThereAMajorPiece(board)){
-        board.makeNullMove();
-        int eval = -best_priv(board, local_depth/2, -beta, -alpha, numNodes, ply);
-        board.unmakeNullMove();
-        #ifdef TIMEMOVE
-        if (stop || time_end()){
-            return 0;
-        }
-        #endif
-        //from rice engine
-        if (eval >= beta){
-            //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
-            if (eval > CHECKMATE_SCORE - 100){
-                eval = beta;
-            }
-            return eval;
-        }
-    }
-    #endif
-
     int max_value = INT_MIN;
     Move best_move = Move();
     Movelist moves;
