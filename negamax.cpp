@@ -38,8 +38,7 @@ using namespace chess;
 // comment for removing IID
 #define IID
 //comment for removing time...
-#define TIMEMOVE
-#define TIMEMOVE
+//#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -235,7 +234,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     }
     #ifdef TT
         TTEntry ttEntry;
-        ttEntry.depth = curr_depth;
+        ttEntry.depth = local_depth;
         ttEntry.value = bestEvaluation;
         ttEntry.bestMove = bestMove;
         ttEntry.age = board.halfMoveClock();
@@ -257,7 +256,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         int alphaOrigin = alpha;
         // transposition table check if position already exists...
         TTEntry ttEntry = table->lookup(board);
-        if (ttEntry.flag != EMPTY)
+        if (ttEntry.flag != EMPTY && ttEntry.depth >= local_depth)
         {
             //update the aging factor...
             #pragma omp critical
@@ -412,7 +411,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             ttEntry.flag = EXACT;
             ttEntry.bestMove = best_move;
         }
-        ttEntry.depth = ply;
+        ttEntry.depth = local_depth;
         ttEntry.hash = board.hash();
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
