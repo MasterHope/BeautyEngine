@@ -258,7 +258,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         // transposition table check if position already exists...
         TTEntry ttEntry = table->lookup(board);
         if (ttEntry.flag != EMPTY)
-        if (ttEntry.flag != EMPTY)
         {
             //update the aging factor...
             #pragma omp critical
@@ -465,7 +464,6 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 }
 
 bool Negamax::time_end(){
-    return (time(NULL) - time_start_search > time_move_seconds);
     return (time(NULL) - time_start_search > time_move_seconds);
 }
 
