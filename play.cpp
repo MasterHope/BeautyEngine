@@ -128,6 +128,7 @@ void uci_loop()
 
 int main()
 {
+    testEngine();
     uci_loop();
     return 0;
 }

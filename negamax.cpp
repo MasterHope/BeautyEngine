@@ -237,7 +237,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     }
     #ifdef TT
         TTEntry ttEntry;
-        ttEntry.depth = local_depth;
+        ttEntry.depth = curr_depth;
         ttEntry.value = bestEvaluation;
         ttEntry.bestMove = bestMove;
         ttEntry.age = board.halfMoveClock();
@@ -259,7 +259,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         int alphaOrigin = alpha;
         // transposition table check if position already exists...
         TTEntry ttEntry = table->lookup(board);
-        if (ttEntry.flag != EMPTY and ttEntry.depth >= local_depth)
+        if (ttEntry.flag != EMPTY)
         {
             //update the aging factor...
             table->tt[board.zobrist() % TTSIZE].age = board.halfMoveClock();
@@ -433,7 +433,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             ttEntry.flag = EXACT;
             ttEntry.bestMove = best_move;
         }
-        ttEntry.depth = local_depth;
+        ttEntry.depth = ply;
         ttEntry.hash = board.hash();
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
@@ -485,8 +485,7 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 }
 
 bool Negamax::time_end(){
-    //-1 because we have some overhead depending on openmp
-    return (time(NULL) - time_start_search > time_move_seconds - 1);
+    return (time(NULL) - time_start_search > time_move_seconds);
 }
 
 bool Negamax::isThereAMajorPiece(Board &board){
