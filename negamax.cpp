@@ -38,7 +38,7 @@ using namespace chess;
 // comment for removing IID
 #define IID
 //comment for removing time...
-//#define TIMEMOVE
+#define TIMEMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
