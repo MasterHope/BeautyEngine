@@ -496,10 +496,10 @@ bool Negamax::time_end(){
 }
 
 bool Negamax::isThereAMajorPiece(Board &board){
-    uint64_t all_bitboard = 0;
+    uint64_t player_stm_bitboard = 0;
     for (uint8_t piece = int(PieceType::KNIGHT); piece < int(PieceType::KING); piece++){
         PieceType p = PieceType(chess::PieceType::underlying(piece));
-        all_bitboard = all_bitboard ^ board.pieces(p).getBits();
+        player_stm_bitboard = player_stm_bitboard ^ board.pieces(p,board.sideToMove()).getBits();
     }
-    return all_bitboard != 0;
+    return player_stm_bitboard != 0;
 }
