@@ -16,6 +16,7 @@ using namespace chess;
 #define KILLER_MOVE 2000
 #define HISTORY_MOVE 1000
 
+
 //Quiescience depth if enabled
 #define QUIESCIENCE_DEPTH 4
 
@@ -39,6 +40,8 @@ using namespace chess;
 #define IID
 //comment for removing time...
 #define TIMEMOVE
+//comment for removing null move
+#define NULLMOVE
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -212,7 +215,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
                 threadBoard.makeMove(moves[i]);
                 numNodes++;
                 ply++;
-                evaluate = -best_priv(threadBoard, thread_depth-1, alpha, beta, numNodes, ply);
+                evaluate = -best_priv(threadBoard, thread_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
                 moves[i].setScore(evaluate);
                 #ifdef LOGGING
                     std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
@@ -241,7 +244,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     return std::make_pair(bestMove, bestEvaluation);
 }
-int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply)
+int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply, bool can_null)
 {
     //break if ending time...)
     #ifdef TIMEMOVE
@@ -331,7 +334,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         return value;
     }
 
-    //from rice engine: mate 
+    //mate distance pruning
     //MATED IN
     alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
     //MATE IN
@@ -341,6 +344,24 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         return alpha;
     }
 
+     //first try not to move if possible...
+    #ifdef NULLMOVE
+    if (can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board)){
+        board.makeNullMove();
+        int eval = -best_priv(board, local_depth-2, -beta, -beta+1, numNodes, ply, false);
+        board.unmakeNullMove();
+        if (stop || time_end()){
+            return 0;
+        }
+        if (eval >= beta){
+            //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
+            if (eval > CHECKMATE_SCORE - 100){
+                eval = beta;
+            }
+            return eval;
+        }
+    }
+    #endif
 
     // alpha beta main method...
     int max_value = INT_MIN;
@@ -364,7 +385,8 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             }
         #endif
         ply++;
-        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply);
+        //We could do null if we are not in the PV (best move)...
+        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply, move.score() != BEST_MOVE);
         //update best move
         if (value > max_value){
             best_move = move;

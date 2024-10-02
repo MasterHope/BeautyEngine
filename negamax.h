@@ -24,8 +24,8 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;time_move_seconds=10;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;time_move_seconds=10;};
+    Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;time_move_seconds=30;};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;time_move_seconds=30;};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
@@ -37,7 +37,7 @@ public:
     bool isThereAMajorPiece(Board &board);
 
 private:
-    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply);
+    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply, bool can_null);
     
 };
 
