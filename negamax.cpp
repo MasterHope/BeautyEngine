@@ -388,7 +388,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
                         killer_moves[local_depth].first = move;
                     }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
-                    history[position(board.sideToMove(), move.from(), move.to())] += local_depth *local_depth;
+                    history[position(board.sideToMove(), move.from(), move.to())] += ply *ply;
                 }
                 break;
             }
