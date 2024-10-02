@@ -347,9 +347,9 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         return alpha;
     }
 
-     //first try not to move if possible...
+    //first try not to move if possible... position must not be in check, at least one piece is required and material advantage must not be enormous...
     #ifdef NULLMOVE
-    if (can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board)){
+    if (can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board) && abs(differenceMaterialWhitePerspective(board))<510){
         board.makeNullMove();
         int eval = -best_priv(board, local_depth-2, -beta, -beta+1, numNodes, ply, false);
         board.unmakeNullMove();
@@ -506,4 +506,18 @@ bool Negamax::isThereAMajorPiece(Board &board){
         player_stm_bitboard = player_stm_bitboard ^ board.pieces(p,board.sideToMove()).getBits();
     }
     return player_stm_bitboard != 0;
+}
+
+int Negamax::differenceMaterialWhitePerspective(Board &board){
+    //https://tanjim131.github.io/2020-06-12-count-number-of-1s/
+    int white_eval = 0;
+    int black_eval = 0;
+    
+    for (uint8_t piece = int(PieceType::PAWN); piece < int(PieceType::KING); piece++){
+        PieceType p = PieceType(chess::PieceType::underlying(piece));
+        white_eval += std::bitset<64>(board.pieces(p,Color::WHITE).getBits()).count() * piecesEval[piece];
+        black_eval += std::bitset<64>(board.pieces(p,Color::BLACK).getBits()).count() * piecesEval[piece];
+    }
+    return white_eval - black_eval; 
+
 }

@@ -24,10 +24,15 @@ using namespace chess;
 //a lot of changes... 4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1
 //no main pieces present...8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8
     
+void differenceMaterial(){
+    Engine engine = Engine();
+    engine.curr_board.get()->setFen("8/8/5R2/8/3K1k2/8/3N4/8 b - - 9 5");
+    std::cout<<engine.negamax.get()->differenceMaterialWhitePerspective(*engine.curr_board)<<std::endl;
+}
 
 void isThereAMajorPiece(){
     Engine engine = Engine();
-    engine.curr_board.get()->setFen("8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8");
+    engine.curr_board.get()->setFen("rnbqkbnr/2pp1ppp/1p6/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4");
     std::cout<<engine.negamax.get()->isThereAMajorPiece(*engine.curr_board)<<std::endl;
 }
 
