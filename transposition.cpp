@@ -65,9 +65,7 @@ void TranspositionTable::replace(int index, TTEntry ttEntry){
     //substitute if the new entry is something an higher depth...
     TTEntry currEntry = this->tt[index];
     if (currEntry.depth < ttEntry.depth && currEntry.age < ttEntry.age){
-        #pragma omp critical
-        {
+        #pragma omp atomic
         this->tt[index] = ttEntry;
-        }
     }
 };

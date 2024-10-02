@@ -198,7 +198,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves)
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves, killer_moves, history)
     {
         threadBoard = board;
         thread_depth = local_depth;
@@ -382,12 +382,15 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
                 if (!board.isCapture(move)){
                     //add move to killer moves...
                     if (killer_moves[local_depth].first != Move()){
+                        #pragma omp atomic
                         killer_moves[local_depth].second = move;
                     //I could save two killer moves max...
                     } else {
+                        #pragma omp atomic
                         killer_moves[local_depth].first = move;
                     }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
+                    #pragma omp atomic
                     history[position(board.sideToMove(), move.from(), move.to())] += ply *ply;
                 }
                 break;
