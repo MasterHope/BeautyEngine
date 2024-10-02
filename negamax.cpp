@@ -382,12 +382,16 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
                 if (!board.isCapture(move)){
                     //add move to killer moves...
                     if (killer_moves[local_depth].first != Move()){
-                        #pragma omp atomic
+                        #pragma omp critical 
+                        {
                         killer_moves[local_depth].second = move;
+                        }
                     //I could save two killer moves max...
                     } else {
-                        #pragma omp atomic
+                        #pragma omp critical
+                        {
                         killer_moves[local_depth].first = move;
+                        }
                     }
                     //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
                     #pragma omp atomic
