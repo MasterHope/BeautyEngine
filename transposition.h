@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace chess;
 
-constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 25;
+constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 26;
 
 #define EMPTY -1
 #define EXACT 0
