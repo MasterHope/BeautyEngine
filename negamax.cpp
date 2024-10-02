@@ -16,6 +16,8 @@ using namespace chess;
 #define KILLER_MOVE 2000
 #define HISTORY_MOVE 1000
 
+//numNodes in search
+int numNodesSearch = 0;
 
 //Quiescience depth if enabled
 #define QUIESCIENCE_DEPTH 4
@@ -199,20 +201,20 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
     #endif
-    int alpha, beta, ply, evaluate, numNodes, thread_depth;
+    int alpha, beta, ply, evaluate, numNodes = 0, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,numNodes,ply,thread_depth) shared(table, moves, killer_moves, history)
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes)
     {
         threadBoard = board;
         thread_depth = local_depth;
         alpha = INT_MIN;
         beta = INT_MAX;
         evaluate = INT_MIN;
-        numNodes = 0;
         ply = 0;
         #pragma omp for nowait
             for (int i = 0; i < moves.size(); i++){
                 threadBoard.makeMove(moves[i]);
+                #pragma omp atomic
                 numNodes++;
                 ply++;
                 evaluate = -best_priv(threadBoard, thread_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
@@ -242,6 +244,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
     #endif
+    numNodesSearch+=numNodes;
     return std::make_pair(bestMove, bestEvaluation);
 }
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply, bool can_null)
@@ -376,7 +379,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     for (const auto &move : moves)
     {
         board.makeMove(move);
-        
+        #pragma omp atomic
         numNodes++;
         #ifdef LOGGING_DEPTH
             std::clog<< std::string(curr_depth - local_depth, '.') << "Move executed:" <<chess::uci::moveToUci(move) << " ";
@@ -476,6 +479,7 @@ Move Negamax::iterative_deepening(Board &board){
     #endif
     curr_depth = 1;
     killer_moves = std::map<int, std::pair<Move, Move>>();
+    numNodesSearch=0;
     return best_move_until_now;
 }
 
