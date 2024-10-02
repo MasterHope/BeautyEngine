@@ -79,6 +79,16 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
         return 0;
     }
 
+    //mate distance pruning
+    //MATED IN
+    alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
+    //MATE IN
+    beta = std::min(beta, CHECKMATE_SCORE - ply - 1);
+    //prune if mate founded...
+    if (alpha >= beta){
+        return alpha;
+    }
+
     //Generating only capture moves...
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
