@@ -114,7 +114,7 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     
     for(const auto &move : moves)  {
         //not checking losing moves...
-        if (move.score() < 0){
+        if (move.score() < 0 && !board.inCheck()){
             continue;
         }
         board.makeMove(move);
