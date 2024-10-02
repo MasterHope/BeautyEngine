@@ -22,11 +22,22 @@ using namespace chess;
 //black is losing... 8/8/2n5/4k3/1R6/2K5/3N4/8 w - - 0 1
 //free exchange rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2
 //a lot of changes... 4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1
+//no main pieces present...8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8
     
+void differenceMaterial(){
+    Engine engine = Engine();
+    engine.curr_board.get()->setFen("8/8/5R2/8/3K1k2/8/3N4/8 b - - 9 5");
+    std::cout<<engine.negamax.get()->differenceMaterialWhitePerspective(*engine.curr_board)<<std::endl;
+}
+
+void isThereAMajorPiece(){
+    Engine engine = Engine();
+    engine.curr_board.get()->setFen("rnbqkbnr/2pp1ppp/1p6/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4");
+    std::cout<<engine.negamax.get()->isThereAMajorPiece(*engine.curr_board)<<std::endl;
+}
 
 void testEngine(){
     Engine engine = Engine();
-    engine.curr_board.get()->setFen("4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1");
     while (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE){
         engine.go();
         std::cout<<engine.best_move_last_iter<<std::endl;
@@ -44,6 +55,8 @@ void play(chess::Board &board, Negamax &negamax)
         board.makeMove(max_move);
     }
 }
+
+
 
 void uci_loop()
 {
@@ -102,15 +115,8 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
+                //thread doing search
                 std::future<void> bestThread = std::async(std::launch::async, &Engine::go, &engine);
-                /* while (true){     
-                    std::string stop;
-                    std::cin>>stop;
-                    if (stop == "stop"){
-                        engine.stop(&bestThread);
-                        break;
-                    }   
-                } */
                 bestThread.wait();
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
@@ -123,9 +129,9 @@ void uci_loop()
         }
     }
 }
+
 int main()
 {
-    //testEngine();
     uci_loop();
     return 0;
 }

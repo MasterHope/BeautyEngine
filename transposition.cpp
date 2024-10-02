@@ -24,8 +24,11 @@ void TranspositionTable::store(Board &board, TTEntry ttEntry){
     if (this->hasCollisionAt(index)){
         this->replace(index, ttEntry);
     } else {
-        this->tt[index] = ttEntry;
-        this->num_elements++;
+        #pragma omp critical
+        {
+            this->tt[index] = ttEntry;
+            this->num_elements++;
+        }
     }
 };
 
@@ -40,8 +43,11 @@ void TranspositionTable::cleanUp(uint32_t clock){
         TTEntry ttEntry = tt[i];
         if (ttEntry.flag != EMPTY){
             if (ttEntry.age < clock){
-                tt[i] = TTEntry();
-                num_elements--;
+                #pragma omp critical
+                {
+                    tt[i] = TTEntry();
+                    num_elements--;
+                }
                 if (num_elements <= init_element * 0.40){
                     return;
                 }
@@ -59,6 +65,9 @@ void TranspositionTable::replace(int index, TTEntry ttEntry){
     //substitute if the new entry is something an higher depth...
     TTEntry currEntry = this->tt[index];
     if (currEntry.depth < ttEntry.depth && currEntry.age < ttEntry.age){
+        #pragma omp critical
+        {
         this->tt[index] = ttEntry;
+        }
     }
 };
