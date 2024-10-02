@@ -385,6 +385,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
     #endif
+    int value = INT_MIN;
     //finding best move 
     for (const auto &move : moves)
     {
@@ -398,8 +399,17 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
             }
         #endif
         ply++;
-        //We could do null if we are not in the PV (best move)...
-        int value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply, move.score() != BEST_MOVE);
+        //PV SEARCH -> if we are in PV make a complete search
+        //https://www.chessprogramming.org/Principal_Variation_Search
+        if (move.score() == BEST_MOVE){
+            value = -best_priv(board, local_depth - 1, -beta, -alpha, numNodes, ply, false);
+        } else {
+            value = -best_priv(board, local_depth - 1, -alpha-1, -alpha, numNodes, ply, true);
+            //do a research if it is necessary...
+            if (value > alpha && beta-alpha > 1){
+                value = -best_priv(board, local_depth-1, -beta,-alpha, numNodes, ply, false);
+            }
+        }
         //update best move
         if (value > max_value){
             best_move = move;
