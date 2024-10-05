@@ -115,9 +115,7 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
-                //thread doing search
-                std::future<void> bestThread = std::async(std::launch::async, &Engine::go, &engine);
-                bestThread.wait();
+                engine.go();
                 Move bestMove = engine.best_move_last_iter;
                 std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
             }
