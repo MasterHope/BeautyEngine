@@ -3,6 +3,7 @@
 #include "transposition.h"
 #include "evaluation.h"
 #include <string>
+#include <chrono>
 #include <iostream>
 #include <omp.h>
 using namespace chess;
@@ -471,7 +472,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     return max_value;
 }
 Move Negamax::iterative_deepening(Board &board){
-    time(&time_start_search);
+    time_start_search = std::chrono::high_resolution_clock::now();
     Move best_move_until_now = Move();
     int best_move_score = 0;
     while (curr_depth <= this->depth){
@@ -516,7 +517,7 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 }
 
 bool Negamax::time_end(){
-    return (time(NULL) - time_start_search > time_move_seconds);
+    return (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_start_search) > std::chrono::milliseconds(time_move_ms));
 }
 
 bool Negamax::isThereAMajorPiece(Board &board){

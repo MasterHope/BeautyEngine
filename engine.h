@@ -21,7 +21,7 @@ class Engine{
         void go();
         void quit() {};
         void make_move(Move move);
-        void setTime(int timems){this->negamax.get()->time_move_seconds = timems/1000;};
+        void setTime(int timems){this->negamax.get()->time_move_ms = timems;};
 
 };
 #endif

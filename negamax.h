@@ -4,6 +4,7 @@
 #include "evaluation.h"
 #include "transposition.h"
 #include <map>
+#include <chrono>
 #include <atomic>
 using namespace chess;
 
@@ -14,8 +15,8 @@ class Negamax
 public:
     int depth;
     int curr_depth;
-    time_t time_start_search;
-    int time_move_seconds;
+    std::chrono::time_point<std::chrono::high_resolution_clock> time_start_search;
+    int time_move_ms;
     std::atomic<bool> stop{false};
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
@@ -24,8 +25,8 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;time_move_seconds=30;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;time_move_seconds=30;};
+    Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;time_move_ms=10000;};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;time_move_ms=10000;};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
