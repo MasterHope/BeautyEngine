@@ -34,12 +34,12 @@ public:
     bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
     bool time_end();
     std::pair<Move, int> best(Board &board, int depth);
-    int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply);
+    int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
 
 private:
-    int best_priv(Board &board, int depth, int alpha, int beta, int numNodes, int ply, bool can_null);
+    int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);
     
 };
 

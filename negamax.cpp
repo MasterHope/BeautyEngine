@@ -17,11 +17,11 @@ using namespace chess;
 #define KILLER_MOVE 2000
 #define HISTORY_MOVE 1000
 
-//numNodes in search
-int numNodesSearch = 0;
+//when should check time
+#define CHECK_TIME 2047
 
-//Quiescience depth if enabled
-#define QUIESCIENCE_DEPTH 4
+//Quiescence depth if enabled
+#define QUIESCENCE_DEPTH 4
 
 
 //remove comment for logging
@@ -56,9 +56,15 @@ std::string position(Color player, Square square_from, Square square_to){
     return pos;
 }
 //https://www.chessprogramming.org/Quiescence_Search
-int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply){
+int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes){
     #ifdef TIMEMOVE
-    if (stop || time_end()){
+    //like rice engine check time every 2048 nodes...
+    if (!(numNodes & CHECK_TIME)){
+        if (time_end()){
+            stop = true;
+        }
+    }
+    if (stop){
         return 0;
     }
     #endif
@@ -120,7 +126,9 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
         }
         board.makeMove(move);
         ply++;
-        int score = -quiescence( board,-beta, -alpha, quiescence_depth-1, ply);
+        #pragma omp atomic
+        numNodes++;
+        int score = -quiescence( board,-beta, -alpha, quiescence_depth-1, ply, numNodes);
         board.unmakeMove(move);
         ply--;
         if( score >= beta )
@@ -255,14 +263,19 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
     #endif
-    numNodesSearch+=numNodes;
     return std::make_pair(bestMove, bestEvaluation);
 }
-int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int numNodes, int ply, bool can_null)
+int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& numNodes, int ply, bool can_null)
 {
     //break if ending time...)
     #ifdef TIMEMOVE
-    if (stop || time_end()){
+    //like rice engine check time every x nodes...
+    if (!(numNodes & CHECK_TIME)){
+        if (time_end()){
+            stop = true;
+        }
+    }
+    if (stop){
         return 0;
     }
     #endif
@@ -337,7 +350,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
     {
         int value;
         #ifdef QUIESCENCE
-        value = this->quiescence(board, alpha, beta, QUIESCIENCE_DEPTH, ply);
+        value = this->quiescence(board, alpha, beta, QUIESCENCE_DEPTH, ply, numNodes);
         #endif
         #ifndef QUIESCENCE
         value = this->model->eval(board);
@@ -364,9 +377,17 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int n
         board.makeNullMove();
         int eval = -best_priv(board, local_depth-2, -beta, -beta+1, numNodes, ply, false);
         board.unmakeNullMove();
-        if (stop || time_end()){
+        //like rice engine checktime every x nodes...
+        #ifdef TIMEMOVE
+        if (!(numNodes & CHECK_TIME)){
+            if (time_end()){
+                stop = true;
+            }
+        }
+        if (stop){
             return 0;
         }
+        #endif
         if (eval >= beta){
             //it could be a false mate, so we avoid to return it... (we assume that mate is not bigger than 100 depth...)
             if (eval > CHECKMATE_SCORE - 100){
@@ -478,12 +499,9 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
         //It happens if time is over, it invalidates the last depth search.
-        #ifdef TIMEMOVE
-        if (stop || time_end()) {
-            curr_depth++;
+        if (stop){
             break;
         }
-        #endif
         best_move_until_now = curr_move_and_score.first;
         best_move_score = curr_move_and_score.second; 
         //testing mate
@@ -500,7 +518,7 @@ Move Negamax::iterative_deepening(Board &board){
     #endif
     curr_depth = 1;
     killer_moves = std::map<int, std::pair<Move, Move>>();
-    numNodesSearch=0;
+    stop = false;
     return best_move_until_now;
 }
 
