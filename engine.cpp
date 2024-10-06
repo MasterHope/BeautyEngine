@@ -31,7 +31,6 @@ void Engine::position(std::string& fen){
 }
 
 void Engine::reset(){
-    curr_board.get()->setFen(STARTINGFEN);
     negamax.get()->resetTT();
     negamax.get()->history.clear();
     best_move_last_iter = Move();
