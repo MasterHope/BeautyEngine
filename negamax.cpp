@@ -518,7 +518,6 @@ Move Negamax::iterative_deepening(Board &board){
     #endif
     curr_depth = 1;
     killer_moves = std::map<int, std::pair<Move, Move>>();
-    stop = false;
     return best_move_until_now;
 }
 
@@ -566,4 +565,8 @@ void Negamax::resetTT(){
         table.get()->tt[i] = TTEntry();
     }
     table.get()->num_elements = 0;
+}
+
+void Negamax::set_stop(bool value){
+    stop = false;
 }
