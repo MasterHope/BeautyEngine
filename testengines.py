@@ -2,28 +2,29 @@ import chess
 import chess.engine
 import chess.pgn
 import sys
+import asyncio
 
 import random
 from tqdm import tqdm
 
-def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
-    engine = chess.engine.SimpleEngine.popen_uci(dir1)
-    engine2 = chess.engine.SimpleEngine.popen_uci(dir2)
-    engine2.configure(engine2_options)
+async def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
+    _, engine = await chess.engine.popen_uci(dir1)
+    _, engine2 = await chess.engine.popen_uci(dir2)
+    await engine2.configure(engine2_options)
     result = None
     turn = random.randrange(0,1)
     board = chess.Board()
     while not board.is_game_over():
         if turn == 0:
             if board.turn == chess.WHITE:
-                result = engine.play(board, chess.engine.Limit(timeSeconds))
+                result = await engine.play(board, chess.engine.Limit(timeSeconds))
             else:
-                result = engine2.play(board, chess.engine.Limit(timeSeconds))
+                result = await engine2.play(board, chess.engine.Limit(timeSeconds))
         else:
             if board.turn == chess.BLACK:
-                result = engine.play(board, chess.engine.Limit(timeSeconds))
+                result = await engine.play(board, chess.engine.Limit(timeSeconds))
             else:
-                result = engine2.play(board, chess.engine.Limit(timeSeconds))
+                result = await engine2.play(board, chess.engine.Limit(timeSeconds))
         """  """
         board.push(result.move)
     #game ended  
@@ -43,9 +44,8 @@ def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
         else:
             dict_result_game["draw"] += 1
 
-    engine.quit()
-    engine2.quit()
-    return dict_result_game
+    await engine.quit()
+    await engine2.quit()
 
 import logging
 
@@ -59,7 +59,7 @@ second_for_move = 0.1
 episodes = 10
 dict_result_game = {"win":0, "draw":0, "loss":0}
 for i in tqdm(range(episodes), file=sys.stdout):
-    engine_test(dir1, dir2, second_for_move,{"Skill level":4}, dict_result_game)
+    asyncio.run(engine_test(dir1, dir2, second_for_move,{"Skill level":4}, dict_result_game))
 print(dict_result_game)
 
 
