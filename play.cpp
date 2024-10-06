@@ -127,7 +127,7 @@ void uci_loop()
                 engine.curr_board.get()->setFen(line_fen);
             }
         }
-        else if (token == "newgame")
+        else if (token == "ucinewgame")
         {
             engine.reset();
         }
