@@ -13,9 +13,9 @@ using namespace chess;
 #define BEST_MOVE INT16_MAX
 #define CHECKMATE_MOVE INT16_MAX - 1
 #define CHECK_MOVE INT16_MAX - 2
-#define ATTACK_MOVE 3000
-#define KILLER_MOVE 2000
-#define HISTORY_MOVE 1000
+#define KILLER_MOVE INT16_MAX/4
+#define WORST_ATTACK_SCORE -1000
+#define QUIET_MOVE INT16_MIN
 
 //when should check time
 #define CHECK_TIME 2047
@@ -170,6 +170,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         //killer moves
         if (killer_moves[local_depth].first == moves[i] || killer_moves[local_depth].second == moves[i]){
             moves[i].setScore(KILLER_MOVE);
+            continue;
         }
         //add check moves first...
         board.makeMove(moves[i]);
@@ -192,14 +193,13 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         #ifdef PRUNING
             std::map<std::string, int>::iterator it = history.find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
             if (it !=history.end()){
-                moves[i].setScore(it->second + HISTORY_MOVE);
+                //in this way history moves are after attack moves...
+                moves[i].setScore(-WORST_ATTACK_SCORE - it->second);
                 continue;
             }
         #endif
-        //quiet moves valuation
-        board.makeMove(moves[i]);
-        moves[i].setScore(model->eval(board));
-        board.unmakeMove(moves[i]);
+        //quiet moves equally treated
+        moves[i].setScore(QUIET_MOVE);
     }
     std::sort(moves.begin(), moves.end(), [](auto const &a, auto const &b)
          { return a.score() > b.score(); });
@@ -211,7 +211,7 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
     int pieceToIndex = int(pieceTo.type());
     // calculating the value of the attack following MVV-LAA...
     int attacking_value = piecesEval[pieceToIndex] - piecesEval[pieceFromIndex];
-    move.setScore(attacking_value + ATTACK_MOVE);
+    move.setScore(attacking_value);
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
@@ -469,9 +469,9 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                         killer_moves[local_depth].first = move;
                         }
                     }
-                    //https://stackoverflow.com/questions/4527686/how-to-update-stdmap-after-using-the-find-method
+                    //https://www.chessprogramming.org/History_Heuristic
                     #pragma omp atomic
-                    history[position(board.sideToMove(), move.from(), move.to())] += ply *ply;
+                    history[position(board.sideToMove(), move.from(), move.to())] += local_depth * local_depth;
                 }
                 break;
             }
