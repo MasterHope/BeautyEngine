@@ -3,10 +3,16 @@
 #include "engine.h"
 #include <iostream>
 #include <string>
-#include <future>
-
-#include <typeinfo>
+#include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <string>
+#include <thread>
 #include "play.h"
+
+std::mutex m;
+std::condition_variable cv;
+
 using namespace chess;
 
 //some positions to test...
@@ -56,6 +62,14 @@ void play(chess::Board &board, Negamax &negamax)
     }
 }
 
+void go_uci(Engine & engine){
+    engine.go();
+    {
+    std::lock_guard lk(m);
+    engine.negamax.get()->stop = false;
+    }
+    cv.notify_one();
+}
 
 
 void uci_loop()
@@ -68,9 +82,17 @@ void uci_loop()
         token.clear();
         is >> std::skipws >> token;
         if (token == "stop" && engine.isSearching){
-            engine.negamax.get()->stop=true;
+            {
+                std::lock_guard lk(m);
+                engine.negamax.get()->stop=true;
+            }
+            cv.notify_one();
             //wait to finish...
-            while(engine.negamax.get()->stop);
+            {
+                std::unique_lock lk(m);
+                cv.wait(lk, [&engine] { auto negamaxPtr = engine.negamax.get();
+    return negamaxPtr != nullptr && !negamaxPtr->stop;});
+            }
         }
         if (token == "uci")
         {
@@ -111,7 +133,7 @@ void uci_loop()
         {
             engine.reset();
         }
-        else if (token == "go")
+        else if (token == "go" && !engine.isSearching)
         {
             is >> std::skipws >> token;
             if (token=="movetime"){
@@ -120,7 +142,7 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
-                std::thread find_best_move(Engine::go, &engine);
+                std::thread find_best_move(go_uci, std::ref(engine));
                 find_best_move.detach();
             }
         }

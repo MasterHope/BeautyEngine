@@ -24,8 +24,6 @@ void Engine::go(){
     this->curr_board->makeMove(best_move_last_iter);
     std::cout << "bestmove " << uci::moveToUci(this->best_move_last_iter) << std::endl;
     isSearching = false;
-    //set stop = false again at the end
-    negamax.get()->set_stop(false);
 }
 
 void Engine::position(std::string& fen){
