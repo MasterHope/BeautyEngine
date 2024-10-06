@@ -37,9 +37,11 @@ public:
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
+    void resetTT();
 
 private:
     int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);
+    
     
 };
 

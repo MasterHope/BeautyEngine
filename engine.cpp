@@ -2,7 +2,6 @@
 #include "evaluation.h"
 #include "negamax.h"
 #include "chess-library-master/include/chess.hpp"
-#include <future>
 using namespace chess;
 
 Engine::Engine()
@@ -20,12 +19,21 @@ Engine::Engine()
 {
 }
 void Engine::go(){
+    isSearching = true;
     this->best_move_last_iter = this->negamax->iterative_deepening(*this->curr_board);
     this->curr_board->makeMove(best_move_last_iter);
+    std::cout << "bestmove " << uci::moveToUci(this->best_move_last_iter) << std::endl;
+    isSearching = false;
 }
 
 void Engine::position(std::string& fen){
     this->curr_board->setFen(fen);
+}
+
+void Engine::reset(){
+    curr_board.get()->setFen(STARTINGFEN);
+    negamax.get()->resetTT();
+    best_move_last_iter = Move();
 }
 
 

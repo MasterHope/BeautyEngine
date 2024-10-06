@@ -3,6 +3,9 @@
 #include "chess-library-master/include/chess.hpp"
 #include "negamax.h"
 #include <string>
+#include <atomic>
+
+#define STARTINGFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 using namespace chess;
 
@@ -14,6 +17,7 @@ class Engine{
         std::shared_ptr<Board> curr_board;
         std::shared_ptr<Evaluation> model;
         std::shared_ptr<Negamax> negamax;
+        std::atomic<bool> isSearching{false};
 
     public:
         Engine();
@@ -22,6 +26,7 @@ class Engine{
         void quit() {};
         void make_move(Move move);
         void setTime(int timems){this->negamax.get()->time_move_ms = timems;};
+        void reset();
 
 };
 #endif

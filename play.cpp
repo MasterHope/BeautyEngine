@@ -67,6 +67,11 @@ void uci_loop()
         std::istringstream is(command);
         token.clear();
         is >> std::skipws >> token;
+        if (token == "stop" && engine.isSearching){
+            engine.negamax.get()->stop=true;
+            //wait to finish...
+            while(engine.negamax.get()->stop);
+        }
         if (token == "uci")
         {
             std::cout << engine.info << std::endl;
@@ -104,7 +109,7 @@ void uci_loop()
         }
         else if (token == "newgame")
         {
-            engine = Engine();
+            engine.reset();
         }
         else if (token == "go")
         {
@@ -115,9 +120,8 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
-                engine.go();
-                Move bestMove = engine.best_move_last_iter;
-                std::cout << "bestmove " << uci::moveToUci(bestMove) << std::endl;
+                std::thread find_best_move(Engine::go, &engine);
+                find_best_move.detach();
             }
         }
         else if (token == "quit")

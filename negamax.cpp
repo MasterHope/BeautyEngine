@@ -560,3 +560,10 @@ int Negamax::differenceMaterialWhitePerspective(Board &board){
     return white_eval - black_eval; 
 
 }
+
+void Negamax::resetTT(){
+    for(int i = 0; i < TTSIZE; i++){
+        table.get()->tt[i] = TTEntry();
+    }
+    table.get()->num_elements = 0;
+}
