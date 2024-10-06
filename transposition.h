@@ -19,7 +19,7 @@ struct TTEntry{
     int flag = EMPTY;
     int depth = -1;
     Move bestMove = Move();
-    uint32_t age = -1;
+    uint32_t age = 0;
 };
 
 class TranspositionTable{
