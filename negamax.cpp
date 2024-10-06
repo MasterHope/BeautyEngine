@@ -61,7 +61,10 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     //like rice engine check time every 2048 nodes...
     if (!(numNodes & CHECK_TIME)){
         if (time_end()){
+            #pragma omp critical
+            {
             stop = true;
+            }
         }
     }
     if (stop){
@@ -222,7 +225,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes = 0, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes)
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, stop)
     {
         threadBoard = board;
         thread_depth = local_depth;
@@ -272,7 +275,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     //like rice engine check time every x nodes...
     if (!(numNodes & CHECK_TIME)){
         if (time_end()){
+            #pragma omp critical
+            {
             stop = true;
+            }
         }
     }
     if (stop){
@@ -381,7 +387,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         #ifdef TIMEMOVE
         if (!(numNodes & CHECK_TIME)){
             if (time_end()){
+                #pragma omp critical
+                {
                 stop = true;
+                }
             }
         }
         if (stop){
@@ -565,8 +574,4 @@ void Negamax::resetTT(){
         table.get()->tt[i] = TTEntry();
     }
     table.get()->num_elements = 0;
-}
-
-void Negamax::set_stop(bool value){
-    stop = false;
 }

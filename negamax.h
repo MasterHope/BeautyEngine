@@ -38,7 +38,6 @@ public:
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
     void resetTT();
-    void set_stop(bool value);
 
 private:
     int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);

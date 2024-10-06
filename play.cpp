@@ -109,7 +109,7 @@ void uci_loop()
             is >> std::skipws >> option;
             if (option == "startpos")
             {
-                engine.curr_board = std::make_unique<Board>();
+                engine.curr_board.get()->setFen(STARTINGFEN);
                 std::string moves;
                 is >> std::skipws >> moves;
                 if (!moves.empty())
@@ -121,9 +121,7 @@ void uci_loop()
                     }
 
                 }
-            }
-            else if (option == "fen")
-            {
+            } else if (option == "fen") {
                 std::string line_fen; 
                 getline(is, line_fen);
                 engine.curr_board.get()->setFen(line_fen);
