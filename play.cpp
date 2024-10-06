@@ -12,6 +12,7 @@
 
 std::mutex m;
 std::condition_variable cv;
+std::atomic_bool isSearching{false};
 
 using namespace chess;
 
@@ -66,7 +67,7 @@ void go_uci(Engine & engine){
     engine.go();
     {
     std::lock_guard lk(m);
-    engine.negamax.get()->stop = false;
+    isSearching = false;
     }
     cv.notify_one();
 }
@@ -81,18 +82,15 @@ void uci_loop()
         std::istringstream is(command);
         token.clear();
         is >> std::skipws >> token;
-        if (token == "stop" && engine.isSearching){
-            {
-                std::lock_guard lk(m);
-                engine.negamax.get()->stop=true;
-            }
-            cv.notify_one();
+        if (token == "stop" && isSearching){
+            engine.negamax.get()->interrupt = true;
             //wait to finish...
             {
                 std::unique_lock lk(m);
-                cv.wait(lk, [&engine] { auto negamaxPtr = engine.negamax.get();
-    return negamaxPtr != nullptr && !negamaxPtr->stop;});
+                cv.wait(lk, [] { return !isSearching;});
             }
+            //remove stop
+            engine.negamax.get()->interrupt = false;
         }
         if (token == "uci")
         {
@@ -131,7 +129,7 @@ void uci_loop()
         {
             engine.reset();
         }
-        else if (token == "go" && !engine.isSearching)
+        else if (token == "go" && !isSearching)
         {
             is >> std::skipws >> token;
             if (token=="movetime"){
@@ -140,12 +138,14 @@ void uci_loop()
             }
             if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
             {
+                isSearching = true;
                 std::thread find_best_move(go_uci, std::ref(engine));
                 find_best_move.detach();
             }
         }
         else if (token == "quit")
         {
+            //we have to check if the search is finished...
             engine.quit();
             break;
         }

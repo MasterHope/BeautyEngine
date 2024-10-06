@@ -17,7 +17,8 @@ public:
     int curr_depth;
     std::chrono::time_point<std::chrono::high_resolution_clock> time_start_search;
     int time_move_ms;
-    std::atomic<bool> stop{false};
+    bool interrupt = false;
+    bool is_time_finished = false;
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
     std::map<std::string, int> history = std::map<std::string, int>();

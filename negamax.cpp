@@ -17,12 +17,10 @@ using namespace chess;
 #define WORST_ATTACK_SCORE -1000
 #define QUIET_MOVE INT16_MIN
 
-//when should check time
-#define CHECK_TIME 2047
-
 //Quiescence depth if enabled
 #define QUIESCENCE_DEPTH 4
 
+#define TIME_CHECK 2047
 
 //remove comment for logging
 //#define LOGGING
@@ -58,16 +56,13 @@ std::string position(Color player, Square square_from, Square square_to){
 //https://www.chessprogramming.org/Quiescence_Search
 int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes){
     #ifdef TIMEMOVE
-    //like rice engine check time every 2048 nodes...
-    if (!(numNodes & CHECK_TIME)){
+    if (!(numNodes & TIME_CHECK)){
         if (time_end()){
-            #pragma omp critical
-            {
-            stop = true;
-            }
+            #pragma omp atomic write
+            is_time_finished = true;
         }
     }
-    if (stop){
+    if (interrupt || is_time_finished){
         return 0;
     }
     #endif
@@ -225,7 +220,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes = 0, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, stop)
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, interrupt, is_time_finished)
     {
         threadBoard = board;
         thread_depth = local_depth;
@@ -272,16 +267,13 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
 {
     //break if ending time...)
     #ifdef TIMEMOVE
-    //like rice engine check time every x nodes...
-    if (!(numNodes & CHECK_TIME)){
+    if (!(numNodes & TIME_CHECK)){
         if (time_end()){
-            #pragma omp critical
-            {
-            stop = true;
-            }
+            #pragma omp atomic write
+            is_time_finished = true;
         }
     }
-    if (stop){
+    if (interrupt || is_time_finished){
         return 0;
     }
     #endif
@@ -385,15 +377,13 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         board.unmakeNullMove();
         //like rice engine checktime every x nodes...
         #ifdef TIMEMOVE
-        if (!(numNodes & CHECK_TIME)){
+        if (!(numNodes & TIME_CHECK)){
             if (time_end()){
-                #pragma omp critical
-                {
-                stop = true;
-                }
+                #pragma omp atomic write
+                is_time_finished = true;
             }
         }
-        if (stop){
+        if (interrupt || is_time_finished){
             return 0;
         }
         #endif
@@ -508,7 +498,7 @@ Move Negamax::iterative_deepening(Board &board){
     while (curr_depth <= this->depth){
         std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
         //It happens if time is over, it invalidates the last depth search.
-        if (stop){
+        if (interrupt || is_time_finished){
             break;
         }
         best_move_until_now = curr_move_and_score.first;
@@ -527,6 +517,7 @@ Move Negamax::iterative_deepening(Board &board){
     #endif
     curr_depth = 1;
     killer_moves = std::map<int, std::pair<Move, Move>>();
+    is_time_finished = false;
     return best_move_until_now;
 }
 

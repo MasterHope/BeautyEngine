@@ -19,11 +19,9 @@ Engine::Engine()
 {
 }
 void Engine::go(){
-    isSearching = true;
     this->best_move_last_iter = this->negamax->iterative_deepening(*this->curr_board);
     this->curr_board->makeMove(best_move_last_iter);
     std::cout << "bestmove " << uci::moveToUci(this->best_move_last_iter) << std::endl;
-    isSearching = false;
 }
 
 void Engine::position(std::string& fen){

@@ -17,7 +17,6 @@ class Engine{
         std::shared_ptr<Board> curr_board;
         std::shared_ptr<Evaluation> model;
         std::shared_ptr<Negamax> negamax;
-        std::atomic<bool> isSearching{false};
 
     public:
         Engine();
