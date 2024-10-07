@@ -39,6 +39,8 @@ public:
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
     void resetTT();
+    std::pair<GameResultReason, GameResult> isDraw(Board& board);
+    std::pair<GameResultReason, GameResult> isCheckmate(Board &board);
 
 private:
     int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);

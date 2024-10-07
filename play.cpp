@@ -139,19 +139,16 @@ void uci_loop()
                 is >> std::skipws >> token;
                 engine.setTime(atoi(token.c_str()));
             }
-            if (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE)
+            std::lock_guard lk(m);
             {
-                std::lock_guard lk(m);
-                {
-                isSearching = true;
-                }
-                std::thread find_best_move(go_uci, std::ref(engine));
-                find_best_move.detach();
+            isSearching = true;
             }
+            std::thread find_best_move(go_uci, std::ref(engine));
+            find_best_move.detach();
         }
         else if (token == "quit")
         {
-            //we have to check if the search is finished...
+            //TODO we have to check if the search is finished...
             engine.quit();
             break;
         }

@@ -69,16 +69,15 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     #endif
     //base cases...
     //check if we find a terminal state...
-     std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
     //handling checkmates...
-    if (reason_result.first == GameResultReason::CHECKMATE){
+    if (isCheckmate(board).first == GameResultReason::CHECKMATE){
         #ifdef LOGGING_DEPTH
             std::clog << "Checkmate Detected at ply:" << ply<< std::endl;
         #endif
         return -CHECKMATE_SCORE + ply; 
     }
     //repeating moves will return 0...
-    if (reason_result.second == GameResult::DRAW){
+    if (isDraw(board).second == GameResult::DRAW){
         #ifdef LOGGING_DEPTH
             std::clog << "0=DRAW" << std::endl;
         #endif
@@ -171,7 +170,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         //add check moves first...
         board.makeMove(moves[i]);
         if (board.inCheck()){
-            int eval = board.isGameOver().first == GameResultReason::CHECKMATE ? CHECKMATE_MOVE : CHECK_MOVE;
+            int eval = isCheckmate(board).first == GameResultReason::CHECKMATE ? CHECKMATE_MOVE : CHECK_MOVE;
             moves[i].setScore(eval);
             board.unmakeMove(moves[i]);
             continue;       
@@ -323,16 +322,15 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
 
     //base cases...
     //check if we find a terminal state...
-     std::pair<GameResultReason, GameResult> reason_result = board.isGameOver();
     //handling checkmates...
-    if (reason_result.first == GameResultReason::CHECKMATE){
+    if (isCheckmate(board).first == GameResultReason::CHECKMATE){
         #ifdef LOGGING_DEPTH
             std::clog << "Checkmate Detected at ply:" << ply<< std::endl;
         #endif
         return -CHECKMATE_SCORE + ply; 
     }
     //repeating moves will return 0...
-    if (reason_result.second == GameResult::DRAW){
+    if (isDraw(board).second == GameResult::DRAW){
         #ifdef LOGGING_DEPTH
             std::clog << "0=DRAW" << std::endl;
         #endif
@@ -525,7 +523,7 @@ Move Negamax::iterative_deepening(Board &board){
 bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now)
 {
     board.makeMove(best_move_until_now);
-    if (board.isGameOver().first == GameResultReason::CHECKMATE)
+    if (isCheckmate(board).first == GameResultReason::CHECKMATE)
     {
         board.unmakeMove(best_move_until_now);
         return true;
@@ -566,4 +564,27 @@ void Negamax::resetTT(){
         table.get()->tt[i] = TTEntry();
     }
     table.get()->num_elements = 0;
+}
+
+std::pair<GameResultReason, GameResult> Negamax::isDraw(Board& board){
+    if (board.isHalfMoveDraw()) {
+        return board.getHalfMoveDrawType();
+    }
+    if (board.isInsufficientMaterial()) return {GameResultReason::INSUFFICIENT_MATERIAL, GameResult::DRAW};
+    if (board.isRepetition(1)) return {GameResultReason::THREEFOLD_REPETITION, GameResult::DRAW};
+    Movelist movelist;
+    movegen::legalmoves(movelist, board);
+    if (movelist.empty()) {
+        return {GameResultReason::STALEMATE, GameResult::DRAW};
+    }
+    return {GameResultReason::NONE, GameResult::NONE};
+}
+
+std::pair<GameResultReason, GameResult> Negamax::isCheckmate(Board &board){
+    Movelist movelist;
+    movegen::legalmoves(movelist, board);
+    if (movelist.empty()) {
+        if (board.inCheck()) return {GameResultReason::CHECKMATE, GameResult::LOSE};
+    }
+    return {GameResultReason::NONE, GameResult::NONE};
 }
