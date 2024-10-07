@@ -1,11 +1,11 @@
-
 #include "negamax.h"
 #include "transposition.h"
 #include "evaluation.h"
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <omp.h>
+#include <future>
+#include <thread>
 using namespace chess;
 
 //score for move ordering
@@ -211,7 +211,7 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
-std::pair<Move, int> Negamax::best(Board &board, int local_depth)
+std::pair<Move, int> Negamax::best(Board board, int local_depth)
 {
     Movelist moves;
     movegen::legalmoves(moves, board);
@@ -236,6 +236,10 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
         #endif
         ply--;
         board.unmakeMove(moves[i]);
+    }
+    //invalidate uncorrect searches...
+    if(interrupt || is_time_finished){
+        return std::make_pair(Move(), INT_MIN);
     }
     #ifdef TT
         TTEntry ttEntry;
@@ -473,15 +477,22 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
 Move Negamax::iterative_deepening(Board &board){
     time_start_search = std::chrono::high_resolution_clock::now();
     Move best_move_until_now = Move();
-    int best_move_score = 0;
-    while (curr_depth <= this->depth){
-        std::pair<Move, int> curr_move_and_score = this->best(board, curr_depth); 
-        //It happens if time is over, it invalidates the last depth search.
-        if (interrupt || is_time_finished){
-            break;
+    int best_move_score = INT_MIN;
+    int num_threads = 4;
+    std::pair<Move,int> scores[depth];
+    std::future<std::pair<Move, int>> threads[num_threads];
+    for(int i = 1; i <= depth; i+=num_threads-1){
+        for (int j = 0; j < num_threads; j++){
+            threads[j] = std::async(std::launch::async, Negamax::best, this, board, curr_depth);           
         }
-        best_move_until_now = curr_move_and_score.first;
-        best_move_score = curr_move_and_score.second; 
+        for (int j = 0; j < num_threads; j++){
+            threads[j].wait();
+            scores[i + j - 1] = threads[j].get();
+            if (scores[i + j - 1].first != Move() && scores[i + j - 1].second > best_move_score){
+                best_move_until_now = scores[i + j - 1].first;
+                best_move_score = scores[i + j - 1].second;
+            }
+        }
         //testing mate
         if (isBestMoveMate(board, best_move_until_now)){
             curr_depth++;
