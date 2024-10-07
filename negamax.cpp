@@ -43,7 +43,6 @@ using namespace chess;
 #define TIMEMOVE
 //comment for removing null move
 #define NULLMOVE
-#define NUM_THREADS 1
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -220,7 +219,7 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #endif
     int alpha, beta, ply, evaluate, numNodes = 0, thread_depth;
     Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, interrupt, is_time_finished) num_threads(NUM_THREADS)
+    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, interrupt, is_time_finished)
     {
         threadBoard = board;
         thread_depth = local_depth;
