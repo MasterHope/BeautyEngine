@@ -84,7 +84,7 @@ void uci_loop()
         if (token == "stop" && isSearching){
             {
                 std::lock_guard lk(stop);
-                engine.negamax->interrupt = true;
+                engine.negamax->interrupt.store(true);
             }
             //wait to finish...
             {
@@ -94,7 +94,7 @@ void uci_loop()
             //remove stop
             {
                 std::lock_guard lk(stop);
-                engine.negamax->interrupt = false;
+                engine.negamax->interrupt.store(false);
             }
         }
         if (token == "uci")
@@ -154,7 +154,7 @@ void uci_loop()
                 //if i am searching stop search and end the recursion...
                 {
                     std::lock_guard lk(stop);
-                    engine.negamax->interrupt = true;
+                    engine.negamax->interrupt.store(true);
                 }
                 //wait to finish...
                 {
@@ -164,7 +164,7 @@ void uci_loop()
                 //remove stop
                 {
                     std::lock_guard lk(stop);
-                    engine.negamax->interrupt = false;
+                    engine.negamax->interrupt.store(false);
                 }
             }
             engine.quit();

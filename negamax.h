@@ -18,8 +18,8 @@ public:
     int num_threads;
     std::chrono::time_point<std::chrono::high_resolution_clock> time_start_search;
     int time_move_ms;
-    bool interrupt = false;
-    bool is_time_finished = false;
+    std::atomic_bool interrupt{false};
+    std::atomic_bool is_time_finished{false};
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
     std::shared_ptr<std::map<std::string, int>> history = std::make_shared<std::map<std::string, int>>();
@@ -27,16 +27,16 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2;};
+    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency();};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency();};
 
-    void moveOrdering(Board &board, Movelist &moves, int local_depth);
+    void moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
     bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
     bool time_end();
-    Score best(Board& board, int depth);
-    void bestMoveThread(Board board, int local_depth, int j_thread);
+    Score best(Board& board, int depth, int& numNodes);
+    void bestMoveThread(Board board, int local_depth, int j_thread, int& numNodes);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);

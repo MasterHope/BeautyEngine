@@ -14,7 +14,12 @@ async def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game
     result = None
     turn = random.randrange(0,1)
     board = chess.Board()
-    while not board.is_game_over() or board.is_fifty_moves() or board.can_claim_threefold_repetition():
+    while True:
+        outcome = board.outcome()
+        if outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
+            or outcome == chess.Outcome(chess.Termination.STALEMATE, None) or outcome == chess.Outcome(chess.Termination.FIFTY_MOVES, None) or \
+            outcome == chess.Outcome(chess.Termination.THREEFOLD_REPETITION, None):
+            break 
         if turn == 0:
             if board.turn == chess.WHITE:
                 result = await engine.play(board, chess.engine.Limit(timeSeconds))
