@@ -11,6 +11,7 @@ struct Score{
     int eval = INT_MIN;
     int depth = 0;
     Move move = Move();
+    short j_thread;
 };
 
 const int piecesEval[6] = {100, 320, 330, 500, 900, 20000};

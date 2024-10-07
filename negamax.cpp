@@ -4,8 +4,8 @@
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <future>
 #include <thread>
+#include <condition_variable>
 using namespace chess;
 
 //score for move ordering
@@ -47,6 +47,10 @@ using namespace chess;
 //for threading
 std::mutex history_m;
 std::mutex killer_m;
+std::mutex best_m;
+std::condition_variable best_cv;
+std::shared_ptr<Score> best_move_th = std::make_shared<Score>();
+bool moveFindThread = false;
 
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
@@ -211,7 +215,7 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
-Score Negamax::best(Board board, int local_depth)
+Score Negamax::best(Board& board, int local_depth)
 {
     Movelist moves;
     movegen::legalmoves(moves, board);
@@ -255,6 +259,65 @@ Score Negamax::best(Board board, int local_depth)
     score.depth = local_depth;
     return score;
 }
+
+void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
+{
+    Movelist moves;
+    movegen::legalmoves(moves, board);
+    //move_ordering if def
+    #ifdef MOVEORDERING
+    this->moveOrdering(board, moves, local_depth);
+    #endif
+    int alpha = INT_MIN, beta = INT_MAX, ply, bestEvaluation = INT_MIN, numNodes = 0;
+    Move bestMove = Move();
+    for (int i = 0; i < moves.size(); i++){
+        board.makeMove(moves[i]);
+        numNodes++;
+        ply++;
+        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
+        if (evaluate > bestEvaluation){
+            bestMove = moves[i];
+            bestEvaluation = evaluate;
+        }
+        moves[i].setScore(evaluate);
+        #ifdef LOGGING
+            std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
+        #endif
+        ply--;
+        board.unmakeMove(moves[i]);
+    }
+    //invalidate uncorrect searches...
+    if(interrupt || is_time_finished){
+        {
+        std::lock_guard lk(best_m);
+        *best_move_th = Score();
+        moveFindThread = true;
+        }
+        best_cv.notify_one();
+    }
+    #ifdef TT
+        TTEntry ttEntry;
+        ttEntry.depth = local_depth;
+        ttEntry.value = bestEvaluation;
+        ttEntry.bestMove = bestMove;
+        ttEntry.age = board.halfMoveClock();
+        table->store(board, ttEntry);
+    #endif
+    Score score;
+    score.eval = bestEvaluation;
+    score.move = bestMove;
+    score.depth = local_depth;
+    score.j_thread = j_thread;
+    {
+    std::lock_guard lk(best_m);
+    *best_move_th = score;
+    moveFindThread = true;
+    }
+    best_cv.notify_one();
+}
+
+
+
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& numNodes, int ply, bool can_null)
 {
     //break if ending time...)
@@ -480,40 +543,50 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
 }
 Move Negamax::iterative_deepening(Board &board){
     time_start_search = std::chrono::high_resolution_clock::now();
-    Move best_move_until_now = Move();
-    int best_move_score = INT_MIN;
-    int num_threads = 4;
-    Score scores[depth];
-    std::future<Score> threads[num_threads];
-    for(int i = 1; i <= depth; i+=num_threads-1){
-        for (int j = 0; j < num_threads; j++){
-            threads[j] = std::async(std::launch::async, Negamax::best, this, board, curr_depth);           
-        }
-        for (int j = 0; j < num_threads; j++){
-            threads[j].wait();
-            scores[i + j - 1] = threads[j].get();
-            if (scores[i + j - 1].move != Move() && scores[i + j - 1].eval > best_move_score){
-                best_move_until_now = scores[i + j - 1].move;
-                best_move_score = scores[i + j - 1].eval;
-            }
-        }
-        //testing mate
-        if (isBestMoveMate(board, best_move_until_now)){
-            curr_depth++;
-            break;
-        } 
-        curr_depth++;
+    Score bestMove;
+    std::thread threads[num_threads];
+    //search at depth 1 first...
+    bestMove = best(board, 1);
+    int local_depth = 2;
+    int j = 0;
+    while(j < num_threads && local_depth < depth ){
+        threads[j] = std::thread(bestMoveThread,this, board, local_depth, j);
+        j++;
+        local_depth++;
     }
-    //always a move is there...
-    assert((best_move_until_now!=Move(), "Best move is empty"));
-    #ifdef LOGGING
-        std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
-    #endif
-    curr_depth = 1;
+    while(local_depth < depth){
+        std::unique_lock lk(best_m);
+        best_cv.wait(lk, [] {return moveFindThread;});
+        if (interrupt || time_end()) break;     
+        int depth_th = best_move_th->depth;
+        short j_thread = best_move_th->j_thread;
+        if (depth_th > bestMove.depth){
+            int score_th = best_move_th->eval;
+            Move move_th = best_move_th->move;
+            Score newBest;
+            newBest.move = move_th;
+            newBest.eval = score_th;
+            newBest.depth = depth_th;
+            bestMove = newBest; 
+        }
+        *best_move_th = Score();
+        moveFindThread = false;
+        threads[j_thread].join();
+        threads[j_thread] = std::thread(bestMoveThread,this, board, ++local_depth, j_thread);
+        lk.unlock();
+        best_cv.notify_all();
+    }
+    for (int i = 0; i < num_threads; i++){
+        if (threads[i].joinable()){
+            threads[i].join();
+        }
+    }
     killer_moves->clear();
     is_time_finished = false;
-    return best_move_until_now;
-}
+    *best_move_th = Score();
+    moveFindThread = false;
+    return bestMove.move;
+    }
 
 bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now)
 {

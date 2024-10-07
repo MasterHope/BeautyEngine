@@ -14,7 +14,7 @@ class Negamax
 {
 public:
     int depth;
-    int curr_depth;
+    int num_threads;
     std::chrono::time_point<std::chrono::high_resolution_clock> time_start_search;
     int time_move_ms;
     bool interrupt = false;
@@ -26,15 +26,16 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {this->curr_depth = 1;time_move_ms=10000;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {this->curr_depth = 1;time_move_ms=10000;};
+    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=4;};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=4;};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
     bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
     bool time_end();
-    Score best(Board board, int depth);
+    Score best(Board& board, int depth);
+    void bestMoveThread(Board board, int local_depth, int j_thread);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
