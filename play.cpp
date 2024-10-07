@@ -37,19 +37,19 @@ using namespace chess;
     
 void differenceMaterial(){
     Engine engine = Engine();
-    engine.curr_board.get()->setFen("8/8/5R2/8/3K1k2/8/3N4/8 b - - 9 5");
-    std::cout<<engine.negamax.get()->differenceMaterialWhitePerspective(*engine.curr_board)<<std::endl;
+    engine.curr_board->setFen("8/8/5R2/8/3K1k2/8/3N4/8 b - - 9 5");
+    std::cout<<engine.negamax->differenceMaterialWhitePerspective(*engine.curr_board)<<std::endl;
 }
 
 void isThereAMajorPiece(){
     Engine engine = Engine();
-    engine.curr_board.get()->setFen("rnbqkbnr/2pp1ppp/1p6/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4");
-    std::cout<<engine.negamax.get()->isThereAMajorPiece(*engine.curr_board)<<std::endl;
+    engine.curr_board->setFen("rnbqkbnr/2pp1ppp/1p6/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4");
+    std::cout<<engine.negamax->isThereAMajorPiece(*engine.curr_board)<<std::endl;
 }
 
 void testEngine(){
     Engine engine = Engine();
-    while (engine.curr_board.get()->isGameOver().first == GameResultReason::NONE){
+    while (engine.curr_board->isGameOver().first == GameResultReason::NONE){
         engine.go();
         std::cout<<engine.best_move_last_iter<<std::endl;
     }
@@ -89,7 +89,7 @@ void uci_loop()
         if (token == "stop" && isSearching){
             {
                 std::lock_guard lk(stop);
-                engine.negamax.get()->interrupt = true;
+                engine.negamax->interrupt = true;
             }
             //wait to finish...
             {
@@ -99,7 +99,7 @@ void uci_loop()
             //remove stop
             {
                 std::lock_guard lk(stop);
-                engine.negamax.get()->interrupt = false;
+                engine.negamax->interrupt = false;
             }
         }
         if (token == "uci")
@@ -117,7 +117,7 @@ void uci_loop()
             is >> std::skipws >> option;
             if (option == "startpos")
             {
-                engine.curr_board.get()->setFen(STARTINGFEN);
+                engine.curr_board->setFen(STARTINGFEN);
                 std::string moves;
                 is >> std::skipws >> moves;
                 if (!moves.empty())
@@ -132,7 +132,7 @@ void uci_loop()
             } else if (option == "fen") {
                 std::string line_fen; 
                 getline(is, line_fen);
-                engine.curr_board.get()->setFen(line_fen);
+                engine.curr_board->setFen(line_fen);
             }
         }
         else if (token == "ucinewgame")
@@ -159,7 +159,7 @@ void uci_loop()
                 //if i am searching stop search and end the recursion...
                 {
                     std::lock_guard lk(stop);
-                    engine.negamax.get()->interrupt = true;
+                    engine.negamax->interrupt = true;
                 }
                 //wait to finish...
                 {
@@ -169,7 +169,7 @@ void uci_loop()
                 //remove stop
                 {
                     std::lock_guard lk(stop);
-                    engine.negamax.get()->interrupt = false;
+                    engine.negamax->interrupt = false;
                 }
             }
             engine.quit();

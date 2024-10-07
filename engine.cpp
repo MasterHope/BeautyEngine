@@ -29,8 +29,8 @@ void Engine::position(std::string& fen){
 }
 
 void Engine::reset(){
-    negamax.get()->resetTT();
-    negamax.get()->history.clear();
+    negamax->resetTT();
+    negamax->history.clear();
     best_move_last_iter = Move();
 }
 

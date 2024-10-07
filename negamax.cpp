@@ -528,9 +528,9 @@ int Negamax::differenceMaterialWhitePerspective(Board &board){
 
 void Negamax::resetTT(){
     for(int i = 0; i < TTSIZE; i++){
-        table.get()->tt[i] = TTEntry();
+        table->tt[i] = TTEntry();
     }
-    table.get()->num_elements = 0;
+    table->num_elements = 0;
 }
 
 std::pair<GameResultReason, GameResult> Negamax::isDraw(Board& board){
