@@ -160,7 +160,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         }
         #endif
         //killer moves
-        if (killer_moves[local_depth].first == moves[i] || killer_moves[local_depth].second == moves[i]){
+        if ((*killer_moves)[local_depth].first == moves[i] || (*killer_moves)[local_depth].second == moves[i]){
             moves[i].setScore(KILLER_MOVE);
             continue;
         }
@@ -183,8 +183,8 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         }
         //return end if not found...
         #ifdef PRUNING
-            std::map<std::string, int>::iterator it = history.find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
-            if (it !=history.end()){
+            std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
+            if (it !=history->end()){
                 //in this way history moves are after attack moves...
                 moves[i].setScore(-WORST_ATTACK_SCORE - it->second);
                 continue;
@@ -420,14 +420,14 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //add move to killer moves...
-                    if (killer_moves[local_depth].first != Move()){
-                        killer_moves[local_depth].second = move;
+                    if ((*killer_moves)[local_depth].first != Move()){
+                        (*killer_moves)[local_depth].second = move;
                     //I could save two killer moves max...
                     } else {
-                        killer_moves[local_depth].first = move;
+                        (*killer_moves)[local_depth].first = move;
                     }
                     //https://www.chessprogramming.org/History_Heuristic
-                    history[position(board.sideToMove(), move.from(), move.to())] += local_depth * local_depth;
+                    (*history)[position(board.sideToMove(), move.from(), move.to())] += local_depth * local_depth;
                 }
                 break;
             }
@@ -482,7 +482,7 @@ Move Negamax::iterative_deepening(Board &board){
         std::clog<<"best move: " << chess::uci::moveToUci(best_move_until_now)<<" with eval: " << best_move_score<< " for searching at depth: " << curr_depth-1<<std::endl;
     #endif
     curr_depth = 1;
-    killer_moves = std::map<int, std::pair<Move, Move>>();
+    killer_moves->clear();
     is_time_finished = false;
     return best_move_until_now;
 }
