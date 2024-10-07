@@ -6,6 +6,7 @@
 #include <map>
 #include <chrono>
 #include <atomic>
+#include <thread>
 using namespace chess;
 
 std::string position(Color player, Square square_from, Square square_to);
@@ -26,8 +27,8 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=8;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=8;};
+    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2;};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2;};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
