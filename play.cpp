@@ -10,7 +10,8 @@
 #include <thread>
 #include "play.h"
 
-std::mutex m;
+std::mutex search;
+std::mutex stop;
 std::condition_variable cv;
 bool isSearching = false;
 
@@ -69,7 +70,7 @@ void play(chess::Board &board, Negamax &negamax)
 void go_uci(Engine & engine){
     engine.go();
     {
-    std::lock_guard lk(m);
+    std::lock_guard lk(search);
     isSearching = false;
     }
     cv.notify_one();
@@ -86,14 +87,20 @@ void uci_loop()
         token.clear();
         is >> std::skipws >> token;
         if (token == "stop" && isSearching){
-            engine.negamax.get()->interrupt = true;
+            {
+                std::lock_guard lk(stop);
+                engine.negamax.get()->interrupt = true;
+            }
             //wait to finish...
             {
-                std::unique_lock lk(m);
+                std::unique_lock lk(search);
                 cv.wait(lk, [] { return !isSearching;});
             }
             //remove stop
-            engine.negamax.get()->interrupt = false;
+            {
+                std::lock_guard lk(stop);
+                engine.negamax.get()->interrupt = false;
+            }
         }
         if (token == "uci")
         {
@@ -139,7 +146,7 @@ void uci_loop()
                 is >> std::skipws >> token;
                 engine.setTime(atoi(token.c_str()));
             }
-            std::lock_guard lk(m);
+            std::lock_guard lk(search);
             {
             isSearching = true;
             }
