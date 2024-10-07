@@ -44,6 +44,10 @@ using namespace chess;
 //comment for removing null move
 #define NULLMOVE
 
+//for threading
+std::mutex history_m;
+std::mutex killer_m;
+
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
@@ -421,13 +425,22 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 if (!board.isCapture(move)){
                     //add move to killer moves...
                     if ((*killer_moves)[local_depth].first != Move()){
+                        {
+                        std::lock_guard lk(killer_m);
                         (*killer_moves)[local_depth].second = move;
+                        }
                     //I could save two killer moves max...
-                    } else {
+                    } else if((*killer_moves)[local_depth].second != Move()){
+                        {
+                        std::lock_guard lk(killer_m);
                         (*killer_moves)[local_depth].first = move;
+                        }
                     }
                     //https://www.chessprogramming.org/History_Heuristic
-                    (*history)[position(board.sideToMove(), move.from(), move.to())] += local_depth * local_depth;
+                    {
+                    std::lock_guard lk(history_m);
+                    (*history)[position(board.sideToMove(), move.from(), move.to())] += local_depth;
+                    }
                 }
                 break;
             }

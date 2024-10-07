@@ -3,6 +3,7 @@
 #include "chess-library-master/include/chess.hpp"
 #include <memory>
 #include <iostream>
+#include <mutex>
 using namespace chess;
 
 constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 26;
