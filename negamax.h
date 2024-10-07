@@ -26,8 +26,8 @@ public:
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=4;};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=4;};
+    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=8;};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=8;};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
