@@ -125,10 +125,6 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
          { return a.score() > b.score(); });
     
     for(const auto &move : moves)  {
-        //not checking losing moves...
-        if (move.score() < 0 && !board.inCheck()){
-            continue;
-        }
         board.makeMove(move);
         ply++;
         {
@@ -351,7 +347,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         if (ttEntry.flag != EMPTY && ttEntry.depth >= local_depth)
         {
             //update the aging factor...
-            table->tt[board.hash() % TTSIZE].age = board.halfMoveClock();
+            table->updateAge(board.hash() % TTSIZE, board.halfMoveClock());
             // restore position
             if (ttEntry.flag == EXACT)
             {

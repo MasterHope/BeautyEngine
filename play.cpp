@@ -120,7 +120,7 @@ void uci_loop()
                     std::string move;
                     while (is >> std::skipws >> move)
                     {
-                        engine.curr_board->makeMove(uci::uciToMove(*engine.curr_board.get(),move)); 
+                        engine.curr_board->makeMove(uci::uciToMove(*engine.curr_board,move)); 
                     }
 
                 }
@@ -141,6 +141,10 @@ void uci_loop()
                 is >> std::skipws >> token;
                 engine.setTime(atoi(token.c_str()));
             }
+            if(engine.curr_board->isGameOver().second != GameResult::NONE){
+                std::cout<<"GAME IS ENDED"<<std::endl;
+                continue;
+            }
             std::lock_guard lk(search);
             {
             isSearching = true;
@@ -150,23 +154,6 @@ void uci_loop()
         }
         else if (token == "quit")
         {
-            if (isSearching){
-                //if i am searching stop search and end the recursion...
-                {
-                    std::lock_guard lk(stop);
-                    engine.negamax->interrupt.store(true);
-                }
-                //wait to finish...
-                {
-                    std::unique_lock lk(search);
-                    cv.wait(lk, [] { return !isSearching;});
-                }
-                //remove stop
-                {
-                    std::lock_guard lk(stop);
-                    engine.negamax->interrupt.store(false);
-                }
-            }
             engine.quit();
             break;
         }

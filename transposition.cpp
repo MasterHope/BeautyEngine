@@ -35,3 +35,10 @@ void TranspositionTable::replace(int index, TTEntry ttEntry){
         }
     }
 };
+
+void TranspositionTable::updateAge(int index, uint32_t clock){
+    {
+        std::lock_guard lk(tt_m);
+        tt[index].age = clock;
+    }
+}

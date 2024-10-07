@@ -32,6 +32,7 @@ class TranspositionTable{
         int hash(Board &board) {return board.hash() % TTSIZE;};
         bool mustClean();
         void cleanUp(uint32_t clock);
+        void updateAge(int index, uint32_t clock);
     
     private:
         void replace(int index, TTEntry ttEntry);
