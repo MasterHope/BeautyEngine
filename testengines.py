@@ -14,7 +14,7 @@ async def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game
     result = None
     turn = random.randrange(0,1)
     board = chess.Board()
-    while not board.is_game_over():
+    while not board.is_game_over() or board.is_fifty_moves() or board.can_claim_threefold_repetition():
         if turn == 0:
             if board.turn == chess.WHITE:
                 result = await engine.play(board, chess.engine.Limit(timeSeconds))
@@ -28,21 +28,24 @@ async def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game
         """  """
         board.push(result.move)
     #game ended  
-    player_to_win = board.outcome().winner
-    if turn == 0:
-        if player_to_win == chess.WHITE:
-            dict_result_game["win"] += 1
-        elif player_to_win == chess.BLACK:
-            dict_result_game["loss"] += 1
-        else:
-            dict_result_game["draw"] += 1
+    if board.is_fifty_moves() or board.can_claim_threefold_repetition():
+        dict_result_game["draw"] += 1
     else:
-        if player_to_win == chess.BLACK:
-            dict_result_game["win"] += 1
-        elif player_to_win == chess.WHITE:
-            dict_result_game["loss"] += 1
+        player_to_win = board.outcome().winner
+        if turn == 0:
+            if player_to_win == chess.WHITE:
+                dict_result_game["win"] += 1
+            elif player_to_win == chess.BLACK:
+                dict_result_game["loss"] += 1
+            else:
+                dict_result_game["draw"] += 1
         else:
-            dict_result_game["draw"] += 1
+            if player_to_win == chess.BLACK:
+                dict_result_game["win"] += 1
+            elif player_to_win == chess.WHITE:
+                dict_result_game["loss"] += 1
+            else:
+                dict_result_game["draw"] += 1
 
     await engine.quit()
     await engine2.quit()
