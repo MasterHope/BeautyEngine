@@ -53,13 +53,13 @@ async def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game
 import logging
 
 # Enable debug logging.
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
     
 dir1 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\play.exe"
 dir2 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\stockfish-windows-x86-64-avx2.exe"
 dir3 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\fairy-stockfish_x86-64.exe"
 second_for_move = 0.1
-episodes = 25
+episodes = 40
 dict_result_game = {"win":0, "draw":0, "loss":0}
 for i in tqdm(range(episodes), file=sys.stdout):
     asyncio.run(engine_test(dir1, dir2, second_for_move,{"Skill level":4}, dict_result_game))

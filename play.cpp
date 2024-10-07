@@ -155,7 +155,11 @@ void uci_loop()
         }
         else if (token == "quit")
         {
-            //TODO we have to check if the search is finished...
+            //wait the search to finish...
+            {
+                std::unique_lock lk(search);
+                cv.wait(lk, [] { return !isSearching;});
+            }
             engine.quit();
             break;
         }
