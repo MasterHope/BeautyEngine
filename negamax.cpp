@@ -58,7 +58,6 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     #ifdef TIMEMOVE
     if (!(numNodes & TIME_CHECK)){
         if (time_end()){
-            #pragma omp atomic write
             is_time_finished = true;
         }
     }
@@ -123,7 +122,6 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
         }
         board.makeMove(move);
         ply++;
-        #pragma omp atomic
         numNodes++;
         int score = -quiescence( board,-beta, -alpha, quiescence_depth-1, ply, numNodes);
         board.unmakeMove(move);
@@ -217,40 +215,23 @@ std::pair<Move, int> Negamax::best(Board &board, int local_depth)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth);
     #endif
-    int alpha, beta, ply, evaluate, numNodes = 0, thread_depth;
-    Board threadBoard;
-    #pragma omp parallel private(alpha,beta,evaluate,threadBoard,ply,thread_depth) shared(table, moves, killer_moves, history, numNodes, interrupt, is_time_finished)
-    {
-        threadBoard = board;
-        thread_depth = local_depth;
-        alpha = INT_MIN;
-        beta = INT_MAX;
-        evaluate = INT_MIN;
-        ply = 0;
-        #pragma omp for nowait
-            for (int i = 0; i < moves.size(); i++){
-                threadBoard.makeMove(moves[i]);
-                #pragma omp atomic
-                numNodes++;
-                ply++;
-                evaluate = -best_priv(threadBoard, thread_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
-                moves[i].setScore(evaluate);
-                #ifdef LOGGING
-                    std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
-                #endif
-                ply--;
-                threadBoard.unmakeMove(moves[i]);
-            }
-    }
-    //looking for best move...
+    int alpha = INT_MIN, beta = INT_MAX, ply, bestEvaluation = INT_MIN, numNodes = 0;
     Move bestMove = Move();
-    int bestEvaluation = INT_MIN;
-    for (int i = 0; i < moves.size();i++){
-        Move move = moves[i];
-        if (bestEvaluation < move.score()){
-            bestMove = move;
-            bestEvaluation = move.score();
+    for (int i = 0; i < moves.size(); i++){
+        board.makeMove(moves[i]);
+        numNodes++;
+        ply++;
+        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
+        if (evaluate > bestEvaluation){
+            bestMove = moves[i];
+            bestEvaluation = evaluate;
         }
+        moves[i].setScore(evaluate);
+        #ifdef LOGGING
+            std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<std::endl;
+        #endif
+        ply--;
+        board.unmakeMove(moves[i]);
     }
     #ifdef TT
         TTEntry ttEntry;
@@ -268,7 +249,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     #ifdef TIMEMOVE
     if (!(numNodes & TIME_CHECK)){
         if (time_end()){
-            #pragma omp atomic write
             is_time_finished = true;
         }
     }
@@ -285,10 +265,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         if (ttEntry.flag != EMPTY && ttEntry.depth >= local_depth)
         {
             //update the aging factor...
-            #pragma omp critical
-            {
             table->tt[board.hash() % TTSIZE].age = board.halfMoveClock();
-            }
             // restore position
             if (ttEntry.flag == EXACT)
             {
@@ -377,7 +354,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         #ifdef TIMEMOVE
         if (!(numNodes & TIME_CHECK)){
             if (time_end()){
-                #pragma omp atomic write
                 is_time_finished = true;
             }
         }
@@ -409,7 +385,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     for (const auto &move : moves)
     {
         board.makeMove(move);
-        #pragma omp atomic
         numNodes++;
         #ifdef LOGGING_DEPTH
             std::clog<< std::string(curr_depth - local_depth, '.') << "Move executed:" <<chess::uci::moveToUci(move) << " ";
@@ -446,19 +421,12 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 if (!board.isCapture(move)){
                     //add move to killer moves...
                     if (killer_moves[local_depth].first != Move()){
-                        #pragma omp critical 
-                        {
                         killer_moves[local_depth].second = move;
-                        }
                     //I could save two killer moves max...
                     } else {
-                        #pragma omp critical
-                        {
                         killer_moves[local_depth].first = move;
-                        }
                     }
                     //https://www.chessprogramming.org/History_Heuristic
-                    #pragma omp atomic
                     history[position(board.sideToMove(), move.from(), move.to())] += local_depth * local_depth;
                 }
                 break;

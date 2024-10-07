@@ -155,10 +155,22 @@ void uci_loop()
         }
         else if (token == "quit")
         {
-            //wait the search to finish...
-            {
-                std::unique_lock lk(search);
-                cv.wait(lk, [] { return !isSearching;});
+            if (isSearching){
+                //if i am searching stop search and end the recursion...
+                {
+                    std::lock_guard lk(stop);
+                    engine.negamax.get()->interrupt = true;
+                }
+                //wait to finish...
+                {
+                    std::unique_lock lk(search);
+                    cv.wait(lk, [] { return !isSearching;});
+                }
+                //remove stop
+                {
+                    std::lock_guard lk(stop);
+                    engine.negamax.get()->interrupt = false;
+                }
             }
             engine.quit();
             break;

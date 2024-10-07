@@ -8,7 +8,6 @@
                 "-std=c++17",
                 "-O3",
                 "-march=native",
-                "-fopenmp",
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}", "${fileDirname}\\evaluation.cpp", "${fileDirname}\\negamax.cpp", "${fileDirname}\\transposition.cpp", "${fileDirname}\\pestoevaluation.cpp",
