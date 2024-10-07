@@ -145,7 +145,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth)
         //Internal Iterative Deepening... if no best move found...
         if (ttEntry.bestMove == Move() && local_depth > 5){
             #ifdef IID
-                Move best = this->best(board, local_depth/2).first;
+                Move best = this->best(board, local_depth/2).move;
                 #ifdef LOGGING
                 if(best != Move()){
                     std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
@@ -211,7 +211,7 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
-std::pair<Move, int> Negamax::best(Board board, int local_depth)
+Score Negamax::best(Board board, int local_depth)
 {
     Movelist moves;
     movegen::legalmoves(moves, board);
@@ -239,7 +239,7 @@ std::pair<Move, int> Negamax::best(Board board, int local_depth)
     }
     //invalidate uncorrect searches...
     if(interrupt || is_time_finished){
-        return std::make_pair(Move(), INT_MIN);
+        return Score();
     }
     #ifdef TT
         TTEntry ttEntry;
@@ -249,7 +249,11 @@ std::pair<Move, int> Negamax::best(Board board, int local_depth)
         ttEntry.age = board.halfMoveClock();
         table->store(board, ttEntry);
     #endif
-    return std::make_pair(bestMove, bestEvaluation);
+    Score score;
+    score.eval = bestEvaluation;
+    score.move = bestMove;
+    score.depth = local_depth;
+    return score;
 }
 int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& numNodes, int ply, bool can_null)
 {
@@ -479,8 +483,8 @@ Move Negamax::iterative_deepening(Board &board){
     Move best_move_until_now = Move();
     int best_move_score = INT_MIN;
     int num_threads = 4;
-    std::pair<Move,int> scores[depth];
-    std::future<std::pair<Move, int>> threads[num_threads];
+    Score scores[depth];
+    std::future<Score> threads[num_threads];
     for(int i = 1; i <= depth; i+=num_threads-1){
         for (int j = 0; j < num_threads; j++){
             threads[j] = std::async(std::launch::async, Negamax::best, this, board, curr_depth);           
@@ -488,9 +492,9 @@ Move Negamax::iterative_deepening(Board &board){
         for (int j = 0; j < num_threads; j++){
             threads[j].wait();
             scores[i + j - 1] = threads[j].get();
-            if (scores[i + j - 1].first != Move() && scores[i + j - 1].second > best_move_score){
-                best_move_until_now = scores[i + j - 1].first;
-                best_move_score = scores[i + j - 1].second;
+            if (scores[i + j - 1].move != Move() && scores[i + j - 1].eval > best_move_score){
+                best_move_until_now = scores[i + j - 1].move;
+                best_move_score = scores[i + j - 1].eval;
             }
         }
         //testing mate

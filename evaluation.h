@@ -7,6 +7,12 @@
 
 using namespace chess;
 
+struct Score{
+    int eval = INT_MIN;
+    int depth = 0;
+    Move move = Move();
+};
+
 const int piecesEval[6] = {100, 320, 330, 500, 900, 20000};
 
 class Evaluation
