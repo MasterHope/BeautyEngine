@@ -207,7 +207,7 @@ Score Negamax::best(Board& board, int local_depth, int& numNodes)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth, numNodes, 0);
     #endif
-    int alpha = INT_MIN, beta = INT_MAX, ply, bestEvaluation = INT_MIN;
+    int alpha = INT_MIN, beta = INT_MAX, ply = 0, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
@@ -255,7 +255,7 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread, int& nu
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth, numNodes,0);
     #endif
-    int alpha = INT_MIN, beta = INT_MAX, ply, bestEvaluation = INT_MIN;
+    int alpha = INT_MIN, beta = INT_MAX, ply=0, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
@@ -474,7 +474,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                     for (int j = 0; j < i; j++){
                         //apply a malus for previous quiet move searched...
                         if (!board.isCapture(moves[j])){
-                            updateHistory(board, move, - 2 *ply);
+                            updateHistory(board, move, - ply);
                         }
                     }
                     }
@@ -530,11 +530,13 @@ void Negamax::updateHistory(chess::Board &board, chess::Move &move, int bonus)
     std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), move.from(), move.to()));
     if (it == history->end())
     {
-        (*history)[position(board.sideToMove(), move.from(), move.to())] = bonus;
+        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
     }
     else
     {
-        (*history)[position(board.sideToMove(), move.from(), move.to())] += bonus;
+        //https://www.chessprogramming.org/History_Heuristic
+        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
+        (*history)[position(board.sideToMove(), move.from(), move.to())] += clampedBonus - (*history)[position(board.sideToMove(), move.from(), move.to())] * abs(clampedBonus) / MAXHISTORY;
     }
 }
 Move Negamax::iterative_deepening(Board &board){
