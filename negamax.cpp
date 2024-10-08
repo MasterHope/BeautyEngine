@@ -675,31 +675,32 @@ Move Negamax::getSmallestAttackerMove(Board& board, Square square, Color color){
     //pawn check
     bitboard_attack = attacks::pawn(~color, square) & board.pieces(PieceType::PAWN, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        std::cout<<Square(__builtin_ctzll(bitboard_attack.getBits()))<<std::endl;
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //knight check
     bitboard_attack = attacks::knight(square) & board.pieces(PieceType::KNIGHT, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //bishop check
     bitboard_attack = attacks::bishop(square, board.occ()) & board.pieces(PieceType::BISHOP, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //rook check
     bitboard_attack = attacks::rook(square, board.occ()) & board.pieces(PieceType::ROOK, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //queen check
     bitboard_attack = attacks::bishop(square, board.occ()) & attacks::rook(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     bitboard_attack = attacks::king(square) & board.pieces(PieceType::KING, color);
     if (bitboard_attack){
-        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     return Move();
 }

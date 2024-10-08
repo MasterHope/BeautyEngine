@@ -29,7 +29,20 @@ using namespace chess;
 //free exchange rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2
 //a lot of changes... 4r3/ppqp1kbp/8/4P3/8/2BN1n1P/PPK3P1/8 b - - 0 1
 //no main pieces present...8/pp1p1k1p/8/3P2P1/6P1/8/P1K5/8 b - - 0 8
+
+void test_see(){
+    Evaluation evaluation = PestoEvaluation();
+    Negamax negamax = Negamax(128, &evaluation);
+    Board board = Board("3r2k1/pp4p1/2p3pn/2Pp2q1/3PPr2/P4B2/1B3P2/2RQ1R1K w - - 1 29");
+    Movelist moves;
+    movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
+    for(int i = 0; i < moves.size();i++){
+        int see_eval = negamax.see(board, moves[i].to(), board.sideToMove());
+        std::cout<<see_eval<<std::endl;
+    }
     
+}
+
 void differenceMaterial(){
     Engine engine = Engine();
     engine.curr_board->setFen("8/8/5R2/8/3K1k2/8/3N4/8 b - - 9 5");
