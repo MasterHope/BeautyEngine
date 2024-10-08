@@ -25,7 +25,7 @@ using namespace chess;
 #define TIME_CHECK 2047
 
 //remove comment for logging
-//#define LOGGING
+#define LOGGING
 
 //ENGINE FEATURES
 
@@ -176,7 +176,9 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& 
         Piece pieceTo = board.at(moves[i].to());
         if (pieceTo != Piece())
         {
-            setScoreAttackingMove(board, moves[i], pieceTo);
+            //using see for move ordering.
+            int see_eval = see(board, moves[i].to(), board.sideToMove());
+            moves[i].setScore(see_eval);
             continue;
         }
         #ifdef PRUNING
@@ -586,6 +588,9 @@ Move Negamax::iterative_deepening(Board &board){
     is_time_finished.store(false);
     *best_move_th = Score();
     moveFindThread = false;
+    #ifdef LOGGING
+    std::cout<<"depth best move:"<<bestMove.depth<<std::endl;
+    #endif
     return bestMove.move;
     }
 
