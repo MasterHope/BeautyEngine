@@ -6,7 +6,7 @@
 #include <mutex>
 using namespace chess;
 
-constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 22;
+constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 24;
 
 #define EMPTY -1
 #define EXACT 0
@@ -17,7 +17,7 @@ constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 22;
 struct TTEntry{
     uint64_t hash = -1;
     int value = -1;
-    int flag = EMPTY;
+    unsigned char flag = EMPTY;
     int depth = -1;
     Move bestMove = Move();
     uint32_t age = 0;

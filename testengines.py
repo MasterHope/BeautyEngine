@@ -56,7 +56,7 @@ def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
 import logging
 
 # Enable debug logging.
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
     
 dir1 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\play.exe"
 dir2 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\stockfish-windows-x86-64-avx2.exe"
