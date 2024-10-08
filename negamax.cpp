@@ -53,6 +53,7 @@ std::condition_variable best_cv;
 std::shared_ptr<Score> best_move_th = std::make_shared<Score>();
 bool moveFindThread = false;
 
+
 std::string position(Color player, Square square_from, Square square_to){
     std::string pos;
     pos.append(std::string(player));
@@ -168,7 +169,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& 
         }
         #endif
         //killer moves
-        if (killer_moves[local_depth].first == moves[i] || killer_moves[local_depth].second == moves[i]){
+        if ((*killer_moves)[local_depth].first == moves[i] || (*killer_moves)[local_depth].second == moves[i]){
             moves[i].setScore(KILLER_MOVE);
             continue;
         }
@@ -505,16 +506,16 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //add move to killer moves...
-                    if (killer_moves[local_depth].first != Move()){
+                    if ((*killer_moves)[local_depth].first != Move()){
                         {
                         std::lock_guard lk(killer_m);
-                        killer_moves[local_depth].second = move;
+                        (*killer_moves)[local_depth].second = move;
                         }
                     //I could save two killer moves max...
-                    } else if(killer_moves[local_depth].second != Move()){
+                    } else if((*killer_moves)[local_depth].second != Move()){
                         {
                         std::lock_guard lk(killer_m);
-                        killer_moves[local_depth].first = move;
+                        (*killer_moves)[local_depth].first = move;
                         }
                     }
                     //https://www.chessprogramming.org/History_Heuristic
@@ -597,8 +598,8 @@ Move Negamax::iterative_deepening(Board &board){
             threads[i].join();
         }
     }
-    //reset killer moves
-    init_killer();
+    //clear killer moves
+    init_killer(false);
     is_time_finished.store(false);
     *best_move_th = Score();
     moveFindThread = false;
@@ -674,8 +675,9 @@ std::pair<GameResultReason, GameResult> Negamax::isCheckmate(Board &board){
     return {GameResultReason::NONE, GameResult::NONE};
 }
 
-void Negamax::init_killer(){
+void Negamax::init_killer(bool reset){
+    if (reset) killer_moves = std::make_shared<std::array<std::pair<Move, Move>, 128>>();
     for(int i =0; i < depth; i++){
-        killer_moves[i] = std::make_pair(Move(),Move());
+        (*killer_moves)[i] = std::make_pair(Move(),Move());
     }
 }
