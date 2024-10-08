@@ -17,9 +17,7 @@ def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
     while True:
         outcome = board.outcome()
         if outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
-            or outcome == chess.Outcome(chess.Termination.STALEMATE, None) or outcome == chess.Outcome(chess.Termination.FIFTY_MOVES, None) or \
-            outcome == chess.Outcome(chess.Termination.THREEFOLD_REPETITION, None):
-            break 
+            or outcome == chess.Outcome(chess.Termination.STALEMATE, None) or board.is_fifty_moves() or board.can_claim_threefold_repetition(): break
         if turn == 0:
             if board.turn == chess.WHITE:
                 result = engine.play(board, chess.engine.Limit(timeSeconds))
@@ -33,7 +31,7 @@ def engine_test(dir1, dir2, timeSeconds, engine2_options, dict_result_game):
         """  """
         board.push(result.move)
     #game ended  
-    if board.is_fifty_moves() or board.can_claim_threefold_repetition():
+    if board.is_fifty_moves() or board.can_claim_threefold_repetition() :
         dict_result_game["draw"] += 1
     else:
         player_to_win = board.outcome().winner
