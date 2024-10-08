@@ -31,7 +31,7 @@ public:
     Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);};
     Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);};
 
-    void moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes);
+    void moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes, int ply);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
     bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
@@ -46,9 +46,9 @@ public:
     std::pair<GameResultReason, GameResult> isCheckmate(Board &board);
     void init_killer(bool reset);
 private:
-    int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);
-    
-    
+    int best_priv(Board &board, int depth, int alpha, int beta, int &numNodes, int ply, bool can_null);
+    void updateKillers(int local_depth, const chess::Move &move);
+    void updateHistory(chess::Board &board, chess::Move &move, int ply);
 };
 
 #endif
