@@ -20,7 +20,7 @@ using namespace chess;
 #define QUIET_MOVE INT16_MIN
 
 //Quiescence depth if enabled
-#define QUIESCENCE_DEPTH 6
+#define QUIESCENCE_DEPTH 4
 
 #define TIME_CHECK 2047
 
