@@ -511,9 +511,11 @@ void Negamax::updateKillers(int ply, const chess::Move &move)
 {
     if ((*killer_moves)[ply].first != Move())
     {
-        {
-            std::lock_guard lk(killer_m);
-            (*killer_moves)[ply].second = move;
+        if ((*killer_moves)[ply].second == Move()){
+            {
+                std::lock_guard lk(killer_m);
+                (*killer_moves)[ply].second = move;
+            }
         }
         // I could save two killer moves max...
     }
