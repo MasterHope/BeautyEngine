@@ -474,7 +474,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                     for (int j = 0; j < i; j++){
                         //apply a malus for previous quiet move searched...
                         if (!board.isCapture(moves[j])){
-                            updateHistory(board, move, - ply);
+                            updateHistory(board, moves[j], - ply);
                         }
                     }
                     }
