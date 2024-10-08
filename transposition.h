@@ -6,7 +6,7 @@
 #include <mutex>
 using namespace chess;
 
-constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 24;
+constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 26;
 
 enum FLAG{EMPTY, EXACT, LOWERBOUND, UPPERBOUND};
 
