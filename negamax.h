@@ -23,12 +23,12 @@ public:
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
     std::shared_ptr<std::map<std::string, int>> history = std::make_shared<std::map<std::string, int>>();
-    std::shared_ptr<std::map<int, std::pair<Move,Move>>> killer_moves = std::make_shared<std::map<int, std::pair<Move,Move>>>();
+    std::shared_ptr<std::pair<Move,Move>[]> killer_moves;
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency();};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency();};
+    Negamax() : depth(1), model(new Evaluation()), killer_moves(new std::pair<Move, Move>[depth]) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer();};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model), killer_moves(new std::pair<Move, Move>[depth]) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer();};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
@@ -43,7 +43,7 @@ public:
     void resetTT();
     std::pair<GameResultReason, GameResult> isDraw(Board& board);
     std::pair<GameResultReason, GameResult> isCheckmate(Board &board);
-
+    void init_killer();
 private:
     int best_priv(Board &board, int depth, int alpha, int beta, int& numNodes, int ply, bool can_null);
     

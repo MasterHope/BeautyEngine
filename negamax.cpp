@@ -168,7 +168,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& 
         }
         #endif
         //killer moves
-        if ((*killer_moves)[local_depth].first == moves[i] || (*killer_moves)[local_depth].second == moves[i]){
+        if (killer_moves[local_depth].first == moves[i] || killer_moves[local_depth].second == moves[i]){
             moves[i].setScore(KILLER_MOVE);
             continue;
         }
@@ -299,7 +299,7 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread, int& nu
         *best_move_th = Score();
         moveFindThread = true;
         }
-        best_cv.notify_one();
+        best_cv.notify_all();
         return;
     }
     #ifdef TT
@@ -320,7 +320,7 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread, int& nu
     *best_move_th = score;
     moveFindThread = true;
     }
-    best_cv.notify_one();
+    best_cv.notify_all();
 }
 
 
@@ -505,22 +505,27 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 //https://www.chessprogramming.org/History_Heuristic
                 if (!board.isCapture(move)){
                     //add move to killer moves...
-                    if ((*killer_moves)[local_depth].first != Move()){
+                    if (killer_moves[local_depth].first != Move()){
                         {
                         std::lock_guard lk(killer_m);
-                        (*killer_moves)[local_depth].second = move;
+                        killer_moves[local_depth].second = move;
                         }
                     //I could save two killer moves max...
-                    } else if((*killer_moves)[local_depth].second != Move()){
+                    } else if(killer_moves[local_depth].second != Move()){
                         {
                         std::lock_guard lk(killer_m);
-                        (*killer_moves)[local_depth].first = move;
+                        killer_moves[local_depth].first = move;
                         }
                     }
                     //https://www.chessprogramming.org/History_Heuristic
                     {
                     std::lock_guard lk(history_m);
+                    std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), move.from(), move.to()));
+                    if (it == history->end()){
+                        (*history)[position(board.sideToMove(), move.from(), move.to())] = local_depth;
+                    } else {
                     (*history)[position(board.sideToMove(), move.from(), move.to())] += local_depth;
+                    }
                     }
                 }
                 break;
@@ -585,13 +590,15 @@ Move Negamax::iterative_deepening(Board &board){
         threads[j_thread].join();
         threads[j_thread] = std::thread(bestMoveThread,this, board, ++local_depth, j_thread, std::ref(numNodes));
         lk.unlock();
+        best_cv.notify_all();
     }
     for (int i = 0; i < num_threads; i++){
         if (threads[i].joinable()){
             threads[i].join();
         }
     }
-    killer_moves->clear();
+    //reset killer moves
+    init_killer();
     is_time_finished.store(false);
     *best_move_th = Score();
     moveFindThread = false;
@@ -665,4 +672,10 @@ std::pair<GameResultReason, GameResult> Negamax::isCheckmate(Board &board){
         if (board.inCheck()) return {GameResultReason::CHECKMATE, GameResult::LOSE};
     }
     return {GameResultReason::NONE, GameResult::NONE};
+}
+
+void Negamax::init_killer(){
+    for(int i =0; i < depth; i++){
+        killer_moves[i] = std::make_pair(Move(),Move());
+    }
 }
