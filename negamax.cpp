@@ -532,12 +532,12 @@ void Negamax::updateHistory(chess::Board &board, chess::Move &move, int bonus)
     std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), move.from(), move.to()));
     if (it == history->end())
     {
-        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
+        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY - 1);
     }
     else
     {
         //https://www.chessprogramming.org/History_Heuristic
-        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
+        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY - 1);
         (*history)[position(board.sideToMove(), move.from(), move.to())] += clampedBonus - (*history)[position(board.sideToMove(), move.from(), move.to())] * abs(clampedBonus) / MAXHISTORY;
     }
 }
