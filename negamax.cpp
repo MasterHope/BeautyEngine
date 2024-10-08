@@ -675,7 +675,6 @@ Move Negamax::getSmallestAttackerMove(Board& board, Square square, Color color){
     //pawn check
     bitboard_attack = attacks::pawn(~color, square) & board.pieces(PieceType::PAWN, color);
     if (bitboard_attack){
-        std::cout<<Square(__builtin_ctzll(bitboard_attack.getBits()))<<std::endl;
         return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //knight check
@@ -694,11 +693,7 @@ Move Negamax::getSmallestAttackerMove(Board& board, Square square, Color color){
         return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //queen check
-    bitboard_attack = attacks::bishop(square, board.occ()) & attacks::rook(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
-    if (bitboard_attack){
-        return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
-    }
-    bitboard_attack = attacks::king(square) & board.pieces(PieceType::KING, color);
+    bitboard_attack = attacks::queen(square, board.occ()) & attacks::rook(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
     if (bitboard_attack){
         return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
