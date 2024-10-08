@@ -10,7 +10,7 @@ using namespace chess;
 
 //some scores
 #define CHECKMATE_SCORE 200000
-#define MAXHISTORY INT16_MAX
+#define MAXHISTORY INT16_MAX - 1
 
 //score for move ordering
 #define BEST_MOVE INT16_MAX
@@ -20,7 +20,7 @@ using namespace chess;
 #define QUIET_MOVE INT16_MIN
 
 //Quiescence depth if enabled
-#define QUIESCENCE_DEPTH 4
+#define QUIESCENCE_DEPTH 6
 
 #define TIME_CHECK 2047
 
@@ -120,6 +120,11 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
          { return a.score() > b.score(); });
     
     for(const auto &move : moves)  {
+        if(move.score() < 0){
+            //we see if the move is losing or not. If it is losing, we skip it.
+            int see_value = see(board, move.to(), board.sideToMove());
+            if (see_value == 0) continue; 
+        }
         board.makeMove(move);
         ply++;
         {
@@ -177,8 +182,8 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& 
         #ifdef PRUNING
             std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
             if (it !=history->end()){
-                //in this way history moves are after good attack moves...
-                moves[i].setScore(-(MAXHISTORY -it->second));
+                //in this way history moves are after good attack moves... +1 to make the number always negative.
+                moves[i].setScore(std::max(-MAXHISTORY,-(MAXHISTORY + 1 - it->second)));
                 continue;
             }
         #endif
@@ -471,12 +476,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                     {
                     std::lock_guard lk(history_m);
                     updateHistory(board, move, ply);
-                    for (int j = 0; j < i; j++){
-                        //apply a malus for previous quiet move searched...
-                        if (!board.isCapture(moves[j])){
-                            updateHistory(board, moves[j], - ply);
-                        }
-                    }
                     }
                 }
                 break;
@@ -532,12 +531,12 @@ void Negamax::updateHistory(chess::Board &board, chess::Move &move, int bonus)
     std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), move.from(), move.to()));
     if (it == history->end())
     {
-        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY - 1);
+        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
     }
     else
     {
         //https://www.chessprogramming.org/History_Heuristic
-        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY - 1);
+        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
         (*history)[position(board.sideToMove(), move.from(), move.to())] += clampedBonus - (*history)[position(board.sideToMove(), move.from(), move.to())] * abs(clampedBonus) / MAXHISTORY;
     }
 }
@@ -664,4 +663,49 @@ void Negamax::init_killer(bool reset){
     for(int i =0; i < depth; i++){
         (*killer_moves)[i] = std::make_pair(Move(),Move());
     }
+}
+
+Move Negamax::getSmallestAttackerMove(Board& board, Square square, Color color){
+    Bitboard bitboard_attack;
+    //pawn check
+    bitboard_attack = attacks::pawn(~color, square) & board.pieces(PieceType::PAWN, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    //knight check
+    bitboard_attack = attacks::knight(square) & board.pieces(PieceType::KNIGHT, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    //bishop check
+    bitboard_attack = attacks::bishop(square, board.occ()) & board.pieces(PieceType::BISHOP, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    //rook check
+    bitboard_attack = attacks::rook(square, board.occ()) & board.pieces(PieceType::ROOK, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    //queen check
+    bitboard_attack = attacks::bishop(square, board.occ()) & attacks::rook(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    bitboard_attack = attacks::king(square) & board.pieces(PieceType::KING, color);
+    if (bitboard_attack){
+        return Move::make(Square(63-__builtin_ctzll(bitboard_attack.getBits())), square);
+    }
+    return Move();
+}
+
+int Negamax::see(Board& board, Square square, Color color){
+    int value = 0;
+    Move move = getSmallestAttackerMove(board, square, color);
+    if (move != Move()){
+        board.makeMove(move);
+        value = std::max(0, piecesEval[board.at(move.to())]-see(board, square, ~color ));
+        board.unmakeMove(move);
+    }
+    return value;   
 }

@@ -45,6 +45,8 @@ public:
     std::pair<GameResultReason, GameResult> isDraw(Board& board);
     std::pair<GameResultReason, GameResult> isCheckmate(Board &board);
     void init_killer(bool reset);
+    Move getSmallestAttackerMove(Board& board, Square square, Color color);
+    int see(Board& board, Square square, Color color);
 private:
     int best_priv(Board &board, int depth, int alpha, int beta, int &numNodes, int ply, bool can_null);
     void updateKillers(int local_depth, const chess::Move &move);
