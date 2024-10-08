@@ -8,11 +8,7 @@ using namespace chess;
 
 constexpr std::size_t TTSIZE = static_cast<std::size_t>(1) << 24;
 
-#define EMPTY -1
-#define EXACT 0
-#define LOWERBOUND 1
-#define UPPERBOUND 2
-
+enum FLAG{EMPTY, EXACT, LOWERBOUND, UPPERBOUND};
 
 struct TTEntry{
     uint64_t hash = -1;
