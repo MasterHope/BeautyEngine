@@ -347,6 +347,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     if (isDraw(board).second == GameResult::DRAW){
         return 0;
     }
+    //if board is in check, we work at higher depth... (like rice engine)...
+    if (board.inCheck()){
+        local_depth++;
+    }
     if (local_depth == 0)
     {
         int value;
