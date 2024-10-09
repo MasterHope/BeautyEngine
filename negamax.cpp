@@ -89,15 +89,14 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
     int stand_pat = this->model->eval(board);
-    
+    int max_score = stand_pat;
     //if it is a quiet position or if the recursion stops, than return standard evaluation.
     if (quiescence_depth == 0 || moves.size() == 0){
         return stand_pat;
     }
-    if( stand_pat >= beta )
-        return beta;
-    if( alpha < stand_pat )
-        alpha = stand_pat;
+    alpha = std::max(alpha, stand_pat);
+    if(alpha >= beta )
+        return stand_pat;
     //ordering captures
     for (int i = 0; i < moves.size(); i++){
         Move move = moves[i];
@@ -120,12 +119,12 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
         int score = -quiescence( board,-beta, -alpha, quiescence_depth-1, ply, numNodes);
         board.unmakeMove(move);
         ply--;
-        if( score >= beta )
-            return beta;
-        if( score > alpha )
-           alpha = score;
+        max_score = std::max(score, max_score);
+        alpha = std::max(max_score, alpha);
+        if( alpha >= beta )
+            break;
     }
-    return alpha;
+    return max_score;
 }
 
 void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int ply)

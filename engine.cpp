@@ -15,7 +15,7 @@ Engine::Engine()
       best_move_last_iter(Move()), // Default initialization
       curr_board(std::make_shared<Board>()), 
       model(std::make_shared<PestoEvaluation>()), 
-      negamax(std::make_shared<Negamax>(128, model.get()))
+      negamax(std::make_shared<Negamax>(model.get()))
 {
 }
 void Engine::go(){

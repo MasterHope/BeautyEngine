@@ -32,7 +32,7 @@ using namespace chess;
 
 void test_see(){
     Evaluation evaluation = PestoEvaluation();
-    Negamax negamax = Negamax(128, &evaluation);
+    Negamax negamax = Negamax( &evaluation);
     Board board = Board("3r2k1/pp4p1/2p3pn/2Pp2q1/3PPr2/P4B2/1B3P2/2RQ1R1K w - - 1 29");
     Movelist moves;
     movegen::legalmoves<movegen::MoveGenType::CAPTURE>(moves, board);
