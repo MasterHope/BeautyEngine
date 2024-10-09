@@ -1,5 +1,7 @@
 #include "findpattern.h"
 
+static int pawns_penalities[3] = {50,45,60};
+
 uint64_t get_file_bitboard(int file) {
     return file < 0 || file > 7? 0 : (1ULL << file) | (1ULL << (file + 8)) | (1ULL << (file + 16)) | (1ULL << (file + 24)) |
            (1ULL << (file + 32)) | (1ULL << (file + 40)) | (1ULL << (file + 48)) | (1ULL << (file + 56));
@@ -14,14 +16,14 @@ std::array<int,3> pawns_structure(Board& board, Color color){
         auto par_result_opp = occ_other & get_file_bitboard(file);
         //doubled pawn check
         if (attacks::shift<Direction::NORTH>(par_result) & par_result || attacks::shift<Direction::SOUTH>(par_result) & par_result){
-            pawns_structure[pattern::DOUBLED]++;
+            pawns_structure[DOUBLED]++;
         
         //blocked pawn check
         }  else if (par_result_opp & attacks::shift<Direction::NORTH>(par_result)){
-            pawns_structure[pattern::BLOCKED]++;
+            pawns_structure[BLOCKED]++;
         //isolated pawn
         } else if ( par_result && ((occ & get_file_bitboard(file - 1)) ^ (occ & get_file_bitboard(file + 1))) ){
-            pawns_structure[pattern::ISOLATED]++;
+            pawns_structure[ISOLATED]++;
         }
     }
     return pawns_structure;
@@ -32,8 +34,8 @@ std::array<int,3> pawns_structure(Board& board, Color color){
 int8_t pawnsPenalitiesColor(Board& board, Color color){
     std::array<int, 3> pawns = pawns_structure(board, color);
     int8_t penality = 0;
-    for (int i = pattern::DOUBLED; i <= pattern::ISOLATED; i++){
-        penality+=pawns[i] * pattern::pawns_penalities[i];
+    for (int i = DOUBLED; i <= ISOLATED; i++){
+        penality+=pawns[i] * pawns_penalities[i];
     }
     return penality;
 }
@@ -55,6 +57,25 @@ int8_t mobility(Board& board){
     return us - them;
 }
 
+int8_t pawnShield(Board& board, Color color){
+    Square kingSq = board.kingSq(color);
+    std::string castle = board.getCastleString();
+    int8_t final_value = 0;
+    if (castle != "- -"){
+        if (color == Color::WHITE){
+            if (castle.find("K") || castle.find("Q")){
+                auto occ = board.pieces(PieceType::PAWN, color);
+                final_value = __builtin_popcountll((attacks::king(kingSq) & occ).getBits()); 
+            }
+        } else {
+            if (castle.find("k") || castle.find("q")){
+                auto occ = board.pieces(PieceType::PAWN, color);
+                final_value = __builtin_popcountll((attacks::king(kingSq) & occ).getBits());
+            }
+        }
+    }
+    return final_value;
+}
 
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"
 //"k5n1/6P1/3p4/B2P4/8/1P6/1P6/4K3 w - - 0 1"
