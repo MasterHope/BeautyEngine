@@ -49,12 +49,6 @@ void differenceMaterial(){
     std::cout<<engine.negamax->differenceMaterialWhitePerspective(*engine.curr_board)<<std::endl;
 }
 
-void isThereAMajorPiece(){
-    Engine engine = Engine();
-    engine.curr_board->setFen("rnbqkbnr/2pp1ppp/1p6/p3p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4");
-    std::cout<<engine.negamax->isThereAMajorPiece(*engine.curr_board)<<std::endl;
-}
-
 void testEngine(){
     Engine engine = Engine();
     while (engine.curr_board->isGameOver().first == GameResultReason::NONE){
@@ -178,3 +172,5 @@ int main()
     uci_loop();
     return 0;
 }
+
+

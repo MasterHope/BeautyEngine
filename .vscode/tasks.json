@@ -11,6 +11,7 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}", "${fileDirname}\\evaluation.cpp", "${fileDirname}\\negamax.cpp", "${fileDirname}\\transposition.cpp", "${fileDirname}\\pestoevaluation.cpp",
+                "${fileDirname}\\findpattern.cpp",
                 "${fileDirname}\\engine.cpp", "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
             ],
