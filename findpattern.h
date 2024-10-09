@@ -11,6 +11,7 @@ std::array<int,3> pawns_structure(Board& board, Color color);
 int8_t pawnsPenalitiesColor(Board& board, Color color);
 int8_t pawnsPenalities(Board& board);
 int8_t mobility(Board& board);
-int8_t pawnShield(Board& board, Color color);
+int8_t kingPawnShield(Board& board, Color color);
+int8_t kingVirtualMobility(Board& board, Color color);
 
 #endif

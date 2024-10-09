@@ -181,9 +181,10 @@ int main(){
     std::cout<<pawns_structure(board, Color::WHITE)[2]<<std::endl;
     board = Board();
     std::cout<<board.getCastleString()<<std::endl;
-    int8_t val = pawnShield(board, Color::WHITE); 
-    std::cout<<val<<std::endl;
-    std::cout<<__builtin_popcountll(0);
+    int8_t val = kingPawnShield(board, Color::WHITE); 
+    board = Board("k7/6p1/1n3n2/8/3K4/8/8/3b2q1 w - - 0 1");
+    int8_t king = kingVirtualMobility(board, Color::WHITE);
+    std::cout<<king+1<<std::endl;
     return 0;
 }
 

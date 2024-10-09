@@ -647,7 +647,7 @@ Move Negamax::getSmallestAttackerMove(Board& board, Square square, Color color){
         return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }
     //queen check
-    bitboard_attack = attacks::queen(square, board.occ()) & attacks::rook(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
+    bitboard_attack = attacks::queen(square, board.occ()) & board.pieces(PieceType::QUEEN, color);
     if (bitboard_attack){
         return Move::make(Square(__builtin_ctzll(bitboard_attack.getBits())), square);
     }

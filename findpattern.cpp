@@ -57,7 +57,7 @@ int8_t mobility(Board& board){
     return us - them;
 }
 
-int8_t pawnShield(Board& board, Color color){
+int8_t kingPawnShield(Board& board, Color color){
     Square kingSq = board.kingSq(color);
     std::string castle = board.getCastleString();
     int8_t final_value = 0;
@@ -77,11 +77,24 @@ int8_t pawnShield(Board& board, Color color){
     return final_value;
 }
 
+
+int8_t kingVirtualMobility(Board& board, Color color){
+    int16_t attacks_from_other_pieces = 0;
+    Square kingSq = board.kingSq(color);
+    auto occ = board.occ();
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * 1;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * 3;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * 3;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * 5;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * 9;
+    return attacks_from_other_pieces;
+}
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"
 //"k5n1/6P1/3p4/B2P4/8/1P6/1P6/4K3 w - - 0 1"
 //"1k6/8/8/3p4/8/8/8/6K1 w - - 0 1"
 //"k7/4P3/2P5/8/8/7P/P5P1/K7 w - - 0 1"
 //""k5n1/6P1/3p4/B2P4/8/1P6/1P6/4K3 w - - 0 1""
+//"k7/6p1/1n3n2/8/3K4/8/8/3b2q1 w - - 0 1"
 /* int main(){
     Board board = Board("k7/4P3/2P5/8/8/7P/P5P1/K7 w - - 0 1");
     std::cout<<pawns_structure(board, Color::WHITE)[0]<<std::endl;
