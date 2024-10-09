@@ -310,7 +310,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         return 0;
     }
     #endif
-
     //find if a move is already calculated...
     #if defined(TT) && defined(PRUNING)
         int alphaOrigin = alpha;
@@ -379,10 +378,11 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     if (alpha >= beta){
         return alpha;
     }
-
+    
+    bool isPvNode = (beta - alpha) > 1;
     //first try not to move if possible... position must not be in check, at least one piece is required and material advantage must not be enormous...
     #ifdef NULLMOVE
-    if (can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board) && abs(differenceMaterialWhitePerspective(board))<510){
+    if (!isPvNode && can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board) && abs(differenceMaterialWhitePerspective(board))<510){
         board.makeNullMove();
         int eval = -best_priv(board, local_depth-2, -beta, -beta+1, numNodes, ply, false);
         board.unmakeNullMove();
@@ -406,7 +406,6 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         }
     }
     #endif
-
     // alpha beta main method...
     int max_value = INT_MIN;
     Move best_move = Move();
@@ -431,7 +430,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
         } else {
             value = -best_priv(board, local_depth - 1, -alpha-1, -alpha, numNodes, ply, true);
             //do a research if it is necessary...
-            if (value > alpha && beta-alpha > 1){
+            if (value > alpha && isPvNode){
                 value = -best_priv(board, local_depth-1, -beta,-alpha, numNodes, ply, false);
             }
         }
