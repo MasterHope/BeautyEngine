@@ -200,13 +200,12 @@ Score Negamax::best(Board& board, int local_depth)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth, 0);
     #endif
-    int alpha = INT_MIN, beta = INT_MAX, ply = 0, bestEvaluation = INT_MIN;
+    int alpha = INT_MIN, beta = INT_MAX, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
         numNodes++;
-        ply++;
-        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
+        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, 1, moves[i].score() != BEST_MOVE);
         if (evaluate > bestEvaluation){
             bestMove = moves[i];
             bestEvaluation = evaluate;
@@ -214,7 +213,6 @@ Score Negamax::best(Board& board, int local_depth)
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate<<" at depth= "<<local_depth <<" nodes examined "<< numNodes<<std::endl;
         #endif
-        ply--;
         board.unmakeMove(moves[i]);
     }
     //invalidate uncorrect searches...
@@ -245,13 +243,12 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
     #ifdef MOVEORDERING
     this->moveOrdering(board, moves, local_depth,0);
     #endif
-    int alpha = INT_MIN, beta = INT_MAX, ply=0, bestEvaluation = INT_MIN;
+    int alpha = INT_MIN, beta = INT_MAX, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
         numNodes++;
-        ply++;
-        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
+        int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, 1, moves[i].score() != BEST_MOVE);
         if (evaluate > bestEvaluation){
             bestMove = moves[i];
             bestEvaluation = evaluate;
@@ -259,7 +256,6 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<" at depth= "<<local_depth<<" nodes examined "<< numNodes<<std::endl;
         #endif
-        ply--;
         board.unmakeMove(moves[i]);
     }
     //invalidate uncorrect searches...
