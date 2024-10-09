@@ -48,21 +48,10 @@ using namespace chess;
 std::mutex history_m;
 std::mutex killer_m;
 std::mutex best_m;
-std::mutex num_nodes_m;
 std::condition_variable best_cv;
 std::shared_ptr<Score> best_move_th = std::make_shared<Score>();
 bool moveFindThread = false;
 
-
-std::string position(Color player, Square square_from, Square square_to){
-    std::string pos;
-    pos.append(std::string(player));
-    pos.append(";");
-    pos.append(std::string(square_from));
-    pos.append(";");
-    pos.append(std::string(square_to));
-    return pos;
-}
 //https://www.chessprogramming.org/Quiescence_Search
 int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes){
     #ifdef TIMEMOVE
@@ -127,10 +116,7 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
         }
         board.makeMove(move);
         ply++;
-        {
-        std::lock_guard lk(num_nodes_m);
         numNodes++;
-        }
         int score = -quiescence( board,-beta, -alpha, quiescence_depth-1, ply, numNodes);
         board.unmakeMove(move);
         ply--;
@@ -142,17 +128,17 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     return alpha;
 }
 
-void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes, int ply)
+void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int ply)
 {
     #ifdef TT
         TTEntry ttEntry = table->lookup(board);
         //Internal Iterative Deepening... if no best move found...
         if (ttEntry.bestMove == Move() && local_depth > 5){
             #ifdef IID
-                Move best = this->best(board, local_depth/2, numNodes).move;
+                Move best = this->best(board, local_depth/2).move;
                 #ifdef LOGGING
                 if(best != Move()){
-                    std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<" nodes examined "<< numNodes<<std::endl;
+                    std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
                 }
                 #endif
             #endif
@@ -181,11 +167,11 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int& 
             moves[i].setScore(see_eval);
             continue;
         }
-        #ifdef PRUNING
-            std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), moves[i].from(), moves[i].to()));
-            if (it !=history->end()){
+         #ifdef PRUNING
+            int score = (*history)[board.sideToMove()][moves[i].from().index()][moves[i].to().index()];
+            if (score !=-1){
                 //in this way history moves are after good attack moves... +1 to make the number always negative.
-                moves[i].setScore(std::max(-MAXHISTORY,-(MAXHISTORY + 1 - it->second)));
+                moves[i].setScore(-(MAXHISTORY + 1 - score));
                 continue;
             }
         #endif
@@ -206,22 +192,20 @@ void Negamax::setScoreAttackingMove(chess::Board &board, chess::Move &move, ches
 }
 // negamax with alpha beta pruning, starting with alpha and beta with min and max.
 //https://en.wikipedia.org/wiki/Negamax
-Score Negamax::best(Board& board, int local_depth, int& numNodes)
+Score Negamax::best(Board& board, int local_depth)
 {
+    int numNodes = 0;
     Movelist moves;
     movegen::legalmoves(moves, board);
     //move_ordering if def
     #ifdef MOVEORDERING
-    this->moveOrdering(board, moves, local_depth, numNodes, 0);
+    this->moveOrdering(board, moves, local_depth, 0);
     #endif
     int alpha = INT_MIN, beta = INT_MAX, ply = 0, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
-        {
-        std::lock_guard lk(num_nodes_m);
         numNodes++;
-        }
         ply++;
         int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
         if (evaluate > bestEvaluation){
@@ -254,22 +238,20 @@ Score Negamax::best(Board& board, int local_depth, int& numNodes)
     return score;
 }
 
-void Negamax::bestMoveThread(Board board, int local_depth, int j_thread, int& numNodes)
+void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
 {
+    int numNodes = 0;
     Movelist moves;
     movegen::legalmoves(moves, board);
     //move_ordering if def
     #ifdef MOVEORDERING
-    this->moveOrdering(board, moves, local_depth, numNodes,0);
+    this->moveOrdering(board, moves, local_depth,0);
     #endif
     int alpha = INT_MIN, beta = INT_MAX, ply=0, bestEvaluation = INT_MIN;
     Move bestMove = Move();
     for (int i = 0; i < moves.size(); i++){
         board.makeMove(moves[i]);
-        {
-        std::lock_guard lk(num_nodes_m);
         numNodes++;
-        }
         ply++;
         int evaluate = -best_priv(board, local_depth-1, alpha, beta, numNodes, ply, moves[i].score() != BEST_MOVE);
         if (evaluate > bestEvaluation){
@@ -433,7 +415,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     movegen::legalmoves(moves, board);
     //move_ordering if def
     #ifdef MOVEORDERING
-    this->moveOrdering(board, moves, local_depth, numNodes, ply);
+    this->moveOrdering(board, moves, local_depth, ply);
     #endif
     int value = INT_MIN;
     //finding best move 
@@ -441,10 +423,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     {
         Move move = moves[i];
         board.makeMove(move);
-        {
-        std::lock_guard lk(num_nodes_m);
         numNodes++;
-        }
         ply++;
         //PV SEARCH -> if we are in PV make a complete search
         //https://www.chessprogramming.org/Principal_Variation_Search
@@ -530,29 +509,21 @@ void Negamax::updateKillers(int ply, const chess::Move &move)
 }
 void Negamax::updateHistory(chess::Board &board, chess::Move &move, int bonus)
 {
-    std::map<std::string, int>::iterator it = history->find(position(board.sideToMove(), move.from(), move.to()));
-    if (it == history->end())
-    {
-        (*history)[position(board.sideToMove(), move.from(), move.to())] = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
-    }
-    else
-    {
-        //https://www.chessprogramming.org/History_Heuristic
-        int clampedBonus = std::clamp(bonus, -MAXHISTORY, MAXHISTORY);
-        (*history)[position(board.sideToMove(), move.from(), move.to())] += clampedBonus - (*history)[position(board.sideToMove(), move.from(), move.to())] * abs(clampedBonus) / MAXHISTORY;
-    }
+    //https://www.chessprogramming.org/History_Heuristic
+    int clampedBonus = std::clamp(bonus, 0, MAXHISTORY);
+    assert(((*history)[board.sideToMove()][move.from().index()][move.to().index()]>0, "error history"));
+    (*history)[board.sideToMove()][move.from().index()][move.to().index()] += clampedBonus - (*history)[board.sideToMove()][move.from().index()][move.to().index()] * abs(clampedBonus) / MAXHISTORY;
 }
 Move Negamax::iterative_deepening(Board &board){
     time_start_search = std::chrono::high_resolution_clock::now();
     Score bestMove;
     std::thread threads[num_threads];
-    int numNodes = 0;
     //search at depth 1 first...
-    bestMove = best(board, 1, numNodes);
+    bestMove = best(board, 1);
     int local_depth = 2;
     int j = 0;
     while(j < num_threads && local_depth < depth ){
-        threads[j] = std::thread(bestMoveThread,this, board, local_depth, j, std::ref(numNodes));
+        threads[j] = std::thread(bestMoveThread,this, board, local_depth, j);
         j++;
         local_depth++;
     }
@@ -574,7 +545,7 @@ Move Negamax::iterative_deepening(Board &board){
         *best_move_th = Score();
         moveFindThread = false;
         threads[j_thread].join();
-        threads[j_thread] = std::thread(bestMoveThread,this, board, ++local_depth, j_thread, std::ref(numNodes));
+        threads[j_thread] = std::thread(bestMoveThread,this, board, ++local_depth, j_thread);
         lk.unlock();
         best_cv.notify_all();
     }
@@ -709,4 +680,16 @@ int Negamax::see(Board& board, Square square, Color color){
         board.unmakeMove(move);
     }
     return value;   
+}
+
+
+void Negamax::init_history(bool reset){
+    if (reset) history = std::make_shared<std::array<std::array<std::array<int16_t ,64>, 64>, 2>>();
+    for (int p=0; p<2;p++){
+        for(int i=0; i< 64;i++){
+            for(int j=0; j<64; j++){
+                (*history)[p][i][j] = -1;
+            }
+        }
+    }
 }

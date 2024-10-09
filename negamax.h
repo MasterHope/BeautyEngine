@@ -23,21 +23,21 @@ public:
     std::atomic_bool is_time_finished{false};
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
-    std::shared_ptr<std::map<std::string, int>> history = std::make_shared<std::map<std::string, int>>();
+    std::shared_ptr<std::array<std::array<std::array<int16_t ,64>, 64>, 2>> history = std::make_shared<std::array<std::array<std::array<int16_t ,64>, 64>, 2>>();
     std::shared_ptr<std::array<std::pair<Move,Move>, 128>> killer_moves;
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);};
+    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true); init_history(true);};
+    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);init_history(true);};
 
-    void moveOrdering(Board &board, Movelist &moves, int local_depth, int& numNodes, int ply);
+    void moveOrdering(Board &board, Movelist &moves, int local_depth, int ply);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);
     Move iterative_deepening(Board &board);
     bool isBestMoveMate(chess::Board &board, const chess::Move &best_move_until_now);
     bool time_end();
-    Score best(Board& board, int depth, int& numNodes);
-    void bestMoveThread(Board board, int local_depth, int j_thread, int& numNodes);
+    Score best(Board& board, int depth);
+    void bestMoveThread(Board board, int local_depth, int j_thread);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
     bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
@@ -45,6 +45,7 @@ public:
     std::pair<GameResultReason, GameResult> isDraw(Board& board);
     std::pair<GameResultReason, GameResult> isCheckmate(Board &board);
     void init_killer(bool reset);
+    void init_history(bool reset);
     Move getSmallestAttackerMove(Board& board, Square square, Color color);
     int see(Board& board, Square square, Color color);
 private:

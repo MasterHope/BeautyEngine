@@ -32,9 +32,7 @@ void Engine::reset(){
     negamax->interrupt.store(false);
     negamax->is_time_finished.store(false);
     negamax->resetTT();
-    negamax->history->clear();
-    assert((negamax->history->empty()));
-    assert((negamax->table->num_elements==0));
+    negamax->init_history(false);
     best_move_last_iter = Move();
 }
 
