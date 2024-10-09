@@ -1,6 +1,7 @@
 // https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
 #include "chess-library-master/src/include.hpp"
 #include "evaluation.h"
+#include "findpattern.h"
 using namespace chess;
 
 PestoEvaluation::PestoEvaluation()
@@ -35,7 +36,6 @@ int PestoEvaluation::eval(Board &board)
     mg[int(Color::BLACK)] = 0;
     eg[int(Color::WHITE)] = 0;
     eg[int(Color::BLACK)] = 0;
-
     /* evaluate each piece */
     for (int sq = 0; sq < 64; sq++)
     {
@@ -47,10 +47,23 @@ int PestoEvaluation::eval(Board &board)
             gamePhase += gamephaseInc[pc];
         }
     }
+    //added some functionalities
+    int8_t kps_1 = kingPawnShield(board, board.sideToMove());
+    int8_t kps_0 = kingPawnShield(board, OTHER(board.sideToMove()));
+    int8_t pp = pawnsPenalities(board);
+    int8_t kvm_1 = kingVirtualMobility(board, board.sideToMove());
+    int8_t kvm_0 = kingVirtualMobility(board, OTHER(board.sideToMove()));
 
     /* tapered eval */
     int mgScore = mg[board.sideToMove()] - mg[OTHER(board.sideToMove())];
+    mgScore += kps_1 - kps_0;
+    mgScore -= pp;
+    mgScore -= kvm_1 - kvm_0;
     int egScore = eg[board.sideToMove()] - eg[OTHER(board.sideToMove())];
+    egScore += kps_1 - kps_0;
+    egScore -= pp;
+    egScore -= kvm_1 - kvm_0;
+    
     int mgPhase = gamePhase;
     if (mgPhase > 24)
         mgPhase = 24; /* in case of early promotion */

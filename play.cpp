@@ -167,14 +167,14 @@ void uci_loop()
         }
     }
 }
-/* 
+
 int main()
 {
     uci_loop();
     return 0;
-} */
+}
 
-int main(){
+/* int main(){
     Board board = Board("k7/4P3/2P5/8/8/7P/P5P1/K7 w - - 0 1");
     std::cout<<pawns_structure(board, Color::WHITE)[0]<<std::endl;
     std::cout<<pawns_structure(board, Color::WHITE)[1]<<std::endl;
@@ -187,5 +187,5 @@ int main(){
     std::cout<<king+1<<std::endl;
     return 0;
 }
-
+ */
 

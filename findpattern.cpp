@@ -41,9 +41,8 @@ int8_t pawnsPenalitiesColor(Board& board, Color color){
 }
 
 int8_t pawnsPenalities(Board& board){
-    return pawnsPenalitiesColor(board,board.sideToMove()) - pawnsPenalitiesColor(board,board.sideToMove());
+    return -pawnsPenalitiesColor(board,board.sideToMove()) + pawnsPenalitiesColor(board,~board.sideToMove());
 }
-
 //check the mobility score of the player to play compared to other side...
 int8_t mobility(Board& board){
     Movelist moves;
@@ -74,7 +73,7 @@ int8_t kingPawnShield(Board& board, Color color){
             }
         }
     }
-    return final_value;
+    return final_value * 10;
 }
 
 
@@ -82,11 +81,11 @@ int8_t kingVirtualMobility(Board& board, Color color){
     int16_t attacks_from_other_pieces = 0;
     Square kingSq = board.kingSq(color);
     auto occ = board.occ();
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * 1;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * 3;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * 3;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * 5;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * 9;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * 10;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * 30;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * 30;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * 50;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * 90;
     return attacks_from_other_pieces;
 }
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"
