@@ -39,7 +39,6 @@ public:
     Score best(Board& board, int depth);
     void bestMoveThread(Board board, int local_depth, int j_thread);
     int quiescence(Board &board, int alpha, int beta, int quiescence_depth, int ply, int& numNodes);
-    bool isThereAMajorPiece(Board &board);
     int differenceMaterialWhitePerspective(Board &board);
     void resetTT();
     std::pair<GameResultReason, GameResult> isDraw(Board& board);

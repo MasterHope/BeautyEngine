@@ -376,7 +376,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     bool isPvNode = (beta - alpha) > 1;
     //first try not to move if possible... position must not be in check, at least one piece is required and material advantage must not be enormous...
     #ifdef NULLMOVE
-    if (!isPvNode && can_null && !board.inCheck() && local_depth > 2 && isThereAMajorPiece(board) && abs(differenceMaterialWhitePerspective(board))<510){
+    if (!isPvNode && can_null && !board.inCheck() && local_depth > 2 && board.hasNonPawnMaterial(board.sideToMove()) && abs(differenceMaterialWhitePerspective(board))<510){
         board.makeNullMove();
         int eval = -best_priv(board, local_depth-2, -beta, -beta+1, numNodes, ply, false);
         board.unmakeNullMove();
@@ -571,15 +571,6 @@ bool Negamax::isBestMoveMate(chess::Board &board, const chess::Move &best_move_u
 
 bool Negamax::time_end(){
     return (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_start_search) > std::chrono::milliseconds(time_move_ms));
-}
-
-bool Negamax::isThereAMajorPiece(Board &board){
-    uint64_t player_stm_bitboard = 0;
-    for (uint8_t piece = int(PieceType::KNIGHT); piece < int(PieceType::KING); piece++){
-        PieceType p = PieceType(chess::PieceType::underlying(piece));
-        player_stm_bitboard = player_stm_bitboard ^ board.pieces(p,board.sideToMove()).getBits();
-    }
-    return player_stm_bitboard != 0;
 }
 
 int Negamax::differenceMaterialWhitePerspective(Board &board){
