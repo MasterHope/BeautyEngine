@@ -25,7 +25,7 @@ using namespace chess;
 #define TIME_CHECK 2047
 
 //remove comment for logging
-#define LOGGING
+//#define LOGGING
 
 //ENGINE FEATURES
 

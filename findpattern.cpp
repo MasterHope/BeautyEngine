@@ -1,6 +1,6 @@
 #include "findpattern.h"
 
-static int pawns_penalities[3] = {50,45,60};
+static int pawns_penalities[3] = {25,25,30};
 
 uint64_t get_file_bitboard(int file) {
     return file < 0 || file > 7? 0 : (1ULL << file) | (1ULL << (file + 8)) | (1ULL << (file + 16)) | (1ULL << (file + 24)) |
@@ -73,7 +73,7 @@ int8_t kingPawnShield(Board& board, Color color){
             }
         }
     }
-    return final_value * 10;
+    return final_value * 5;
 }
 
 
@@ -81,11 +81,11 @@ int8_t kingVirtualMobility(Board& board, Color color){
     int16_t attacks_from_other_pieces = 0;
     Square kingSq = board.kingSq(color);
     auto occ = board.occ();
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * 10;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * 30;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * 30;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * 50;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * 90;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * 1;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * 2;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * 2;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * 3;
+    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * 5;
     return attacks_from_other_pieces;
 }
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"

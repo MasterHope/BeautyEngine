@@ -61,7 +61,7 @@ import logging
 dir1 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\play.exe"
 dir2 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\stockfish-windows-x86-64-avx2.exe"
 dir3 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\fairy-stockfish_x86-64.exe"
-second_for_move = 0.05
+second_for_move = 0.1
 episodes = 10
 dict_result_game = {"win":0, "draw":0, "loss":0}
 for i in tqdm(range(episodes), file=sys.stdout):
