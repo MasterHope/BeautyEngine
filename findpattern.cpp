@@ -14,17 +14,30 @@ std::array<int,3> pawns_structure(Board& board, Color color){
         auto par_result_opp = occ_other & get_file_bitboard(file);
         //doubled pawn check
         if (attacks::shift<Direction::NORTH>(par_result) & par_result || attacks::shift<Direction::SOUTH>(par_result) & par_result){
-            pawns_structure[0]++;
+            pawns_structure[DOUBLED]++;
         
         //blocked pawn check
         }  else if (par_result_opp & attacks::shift<Direction::NORTH>(par_result)){
-            pawns_structure[1]++;
+            pawns_structure[BLOCKED]++;
         //isolated pawn
         } else if ( par_result && ((occ & get_file_bitboard(file - 1)) ^ (occ & get_file_bitboard(file + 1))) ){
-            pawns_structure[2]++;
+            pawns_structure[ISOLATED]++;
         }
     }
     return pawns_structure;
+}
+
+int8_t pawnsPenalities(Board& board){
+    return pawnsPenalities(board,board.sideToMove()) - pawnsPenalities(board,board.sideToMove());
+}
+
+int8_t pawnsPenalities(Board& board, Color color){
+    std::array<int, 3> pawns = pawns_structure(board, color);
+    int8_t penality = 0;
+    for (int i = PAWN_PENALITIES::DOUBLED; i <= PAWN_PENALITIES::ISOLATED; i++){
+        penality+=pawns[i] * pawns_penalities[i];
+    }
+    return penality;
 }
 
 //check the mobility score of the player to play compared to other side...
