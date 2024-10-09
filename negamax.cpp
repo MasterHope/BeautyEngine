@@ -211,7 +211,6 @@ Score Negamax::best(Board& board, int local_depth)
             bestMove = moves[i];
             bestEvaluation = evaluate;
         }
-        moves[i].setScore(evaluate);
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate<<" at depth= "<<local_depth <<" nodes examined "<< numNodes<<std::endl;
         #endif
@@ -257,7 +256,6 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
             bestMove = moves[i];
             bestEvaluation = evaluate;
         }
-        moves[i].setScore(evaluate);
         #ifdef LOGGING
             std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<" at depth= "<<local_depth<<" nodes examined "<< numNodes<<std::endl;
         #endif
