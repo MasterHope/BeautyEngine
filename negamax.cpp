@@ -137,7 +137,7 @@ void Negamax::moveOrdering(Board &board, Movelist &moves, int local_depth, int p
                 Move best = this->best(board, local_depth/2).move;
                 #ifdef LOGGING
                 if(best != Move()){
-                    std::cout<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
+                    std::clog<<"Search IID with depth:" << local_depth/2 <<" completed" <<std::endl;
                 }
                 #endif
             #endif
@@ -211,7 +211,7 @@ Score Negamax::best(Board& board, int local_depth)
             bestEvaluation = evaluate;
         }
         #ifdef LOGGING
-            std::cout<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate<<" at depth= "<<local_depth <<" nodes examined "<< numNodes<<std::endl;
+            std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate<<" at depth= "<<local_depth <<" nodes examined "<< numNodes<<std::endl;
         #endif
         board.unmakeMove(moves[i]);
     }
@@ -254,7 +254,7 @@ void Negamax::bestMoveThread(Board board, int local_depth, int j_thread)
             bestEvaluation = evaluate;
         }
         #ifdef LOGGING
-            std::cout<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<" at depth= "<<local_depth<<" nodes examined "<< numNodes<<std::endl;
+            std::clog<<"EVALUATION OF MOVE: "<< chess::uci::moveToUci(moves[i]) << " Score=" << evaluate <<" at depth= "<<local_depth<<" nodes examined "<< numNodes<<std::endl;
         #endif
         board.unmakeMove(moves[i]);
     }
@@ -552,7 +552,7 @@ Move Negamax::iterative_deepening(Board &board){
     *best_move_th = Score();
     moveFindThread = false;
     #ifdef LOGGING
-    std::cout<<"depth best move:"<<bestMove.depth<<std::endl;
+    std::clog<<"depth best move:"<<bestMove.depth<<std::endl;
     #endif
     return bestMove.move;
     }
