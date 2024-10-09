@@ -15,7 +15,7 @@ std::string position(Color player, Square square_from, Square square_to);
 class Negamax
 {
 public:
-    int depth;
+    static constexpr int depth = 128;
     int num_threads;
     std::chrono::time_point<std::chrono::high_resolution_clock> time_start_search;
     int time_move_ms;
@@ -24,12 +24,12 @@ public:
     Evaluation* model;
     std::shared_ptr<TranspositionTable> table = std::make_shared<TranspositionTable>();
     std::shared_ptr<std::array<std::array<std::array<int16_t ,64>, 64>, 2>> history = std::make_shared<std::array<std::array<std::array<int16_t ,64>, 64>, 2>>();
-    std::shared_ptr<std::array<std::pair<Move,Move>, 128>> killer_moves;
+    std::shared_ptr<std::array<std::pair<Move,Move>, depth>> killer_moves;
     
 
 public:
-    Negamax() : depth(1), model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true); init_history(true);};
-    Negamax(int depth, Evaluation* model) : depth(depth), model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);init_history(true);};
+    Negamax() : model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true); init_history(true);};
+    Negamax(Evaluation* model) : model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);init_history(true);};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth, int ply);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);

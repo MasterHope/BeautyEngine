@@ -635,7 +635,7 @@ std::pair<GameResultReason, GameResult> Negamax::isCheckmate(Board &board){
 }
 
 void Negamax::init_killer(bool reset){
-    if (reset) killer_moves = std::make_shared<std::array<std::pair<Move, Move>, 128>>();
+    if (reset) killer_moves = std::make_shared<std::array<std::pair<Move, Move>, Negamax::depth>>();
     for(int i =0; i < depth; i++){
         (*killer_moves)[i] = std::make_pair(Move(),Move());
     }
