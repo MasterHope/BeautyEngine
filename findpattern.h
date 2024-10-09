@@ -3,13 +3,13 @@
 #include "chess-library-master/include/chess.hpp"
 using namespace chess;
 
-enum PAWN_PENALITIES{DOUBLED, BLOCKED, ISOLATED};
-int pawns_penalities[3] = {50,45,60};
-
-uint64_t get_file_bitboard(int file);
-std::array<int,3> pawns_structure(Board& board, Color color);
-int8_t pawnsPenalities(Board& board, Color color);
-int8_t pawnsPenalities(Board& board);
-int8_t mobility(Board& board);
-
+namespace pattern {
+    enum PAWN_PENALITIES{DOUBLED, BLOCKED, ISOLATED};
+    static int pawns_penalities[3] = {50,45,60};
+    uint64_t get_file_bitboard(int file);
+    std::array<int,3> pawns_structure(Board& board, Color color);
+    int8_t pawnsPenalities(Board& board, Color color);
+    int8_t pawnsPenalities(Board& board);
+    int8_t mobility(Board& board);
+}
 #endif

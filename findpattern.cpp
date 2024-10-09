@@ -14,30 +14,32 @@ std::array<int,3> pawns_structure(Board& board, Color color){
         auto par_result_opp = occ_other & get_file_bitboard(file);
         //doubled pawn check
         if (attacks::shift<Direction::NORTH>(par_result) & par_result || attacks::shift<Direction::SOUTH>(par_result) & par_result){
-            pawns_structure[DOUBLED]++;
+            pawns_structure[pattern::DOUBLED]++;
         
         //blocked pawn check
         }  else if (par_result_opp & attacks::shift<Direction::NORTH>(par_result)){
-            pawns_structure[BLOCKED]++;
+            pawns_structure[pattern::BLOCKED]++;
         //isolated pawn
         } else if ( par_result && ((occ & get_file_bitboard(file - 1)) ^ (occ & get_file_bitboard(file + 1))) ){
-            pawns_structure[ISOLATED]++;
+            pawns_structure[pattern::ISOLATED]++;
         }
     }
     return pawns_structure;
 }
 
-int8_t pawnsPenalities(Board& board){
-    return pawnsPenalities(board,board.sideToMove()) - pawnsPenalities(board,board.sideToMove());
-}
 
-int8_t pawnsPenalities(Board& board, Color color){
+
+int8_t pawnsPenalitiesColor(Board& board, Color color){
     std::array<int, 3> pawns = pawns_structure(board, color);
     int8_t penality = 0;
-    for (int i = PAWN_PENALITIES::DOUBLED; i <= PAWN_PENALITIES::ISOLATED; i++){
-        penality+=pawns[i] * pawns_penalities[i];
+    for (int i = pattern::DOUBLED; i <= pattern::ISOLATED; i++){
+        penality+=pawns[i] * pattern::pawns_penalities[i];
     }
     return penality;
+}
+
+int8_t pawnsPenalities(Board& board){
+    return pawnsPenalitiesColor(board,board.sideToMove()) - pawnsPenalitiesColor(board,board.sideToMove());
 }
 
 //check the mobility score of the player to play compared to other side...
@@ -52,17 +54,19 @@ int8_t mobility(Board& board){
     board.unmakeNullMove();
     return us - them;
 }
+
+
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"
 //"k5n1/6P1/3p4/B2P4/8/1P6/1P6/4K3 w - - 0 1"
 //"1k6/8/8/3p4/8/8/8/6K1 w - - 0 1"
 //"k7/4P3/2P5/8/8/7P/P5P1/K7 w - - 0 1"
 //""k5n1/6P1/3p4/B2P4/8/1P6/1P6/4K3 w - - 0 1""
 /* int main(){
-    
     Board board = Board("k7/4P3/2P5/8/8/7P/P5P1/K7 w - - 0 1");
     std::cout<<pawns_structure(board, Color::WHITE)[0]<<std::endl;
     std::cout<<pawns_structure(board, Color::WHITE)[1]<<std::endl;
     std::cout<<pawns_structure(board, Color::WHITE)[2]<<std::endl;
+    board = Board();
+    std::cout<<board.getCastleString()<<std::endl;
     return 0;
-
 } */
