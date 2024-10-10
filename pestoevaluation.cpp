@@ -57,15 +57,15 @@ int PestoEvaluation::eval(Board &board)
 
     /* tapered eval */
     int mgScore = mg[board.sideToMove()] - mg[OTHER(board.sideToMove())];
-    mgScore += kps_1 - kps_0;
+    /* mgScore += kps_1 - kps_0;
     mgScore += mob;
     mgScore -= pp;
-    mgScore -= kvm_1 - kvm_0;
+    mgScore -= kvm_1 - kvm_0; */
     int egScore = eg[board.sideToMove()] - eg[OTHER(board.sideToMove())];
-    egScore += kps_1 - kps_0;
+    /* egScore += kps_1 - kps_0;
     egScore -= pp;
     egScore -= kvm_1 - kvm_0;
-    egScore += mob;
+    egScore += mob; */
     
     int mgPhase = gamePhase;
     if (mgPhase > 24)
