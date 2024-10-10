@@ -28,8 +28,8 @@ public:
     
 
 public:
-    Negamax() : model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true); init_history(true);};
-    Negamax(Evaluation* model) : model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency(); init_killer(true);init_history(true);};
+    Negamax() : model(new Evaluation()) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2; init_killer(true); init_history(true);};
+    Negamax(Evaluation* model) : model(model) {time_move_ms=10000;num_threads=std::thread::hardware_concurrency() - 2; init_killer(true);init_history(true);};
 
     void moveOrdering(Board &board, Movelist &moves, int local_depth, int ply);
     void setScoreAttackingMove(chess::Board &board, chess::Move &move, chess::Piece &pieceTo);

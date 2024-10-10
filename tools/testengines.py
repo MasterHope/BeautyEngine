@@ -1,0 +1,71 @@
+import chess
+import chess.engine
+import chess.pgn
+import sys
+import asyncio
+
+import random
+from tqdm import tqdm
+
+def engine_test(dirMyEngine, dirOtherEngine, timeSeconds, dirOtherEngineOptions, dict_result_game, startingPosition):
+    engine = chess.engine.SimpleEngine.popen_uci(dirMyEngine)
+    engine2 = chess.engine.SimpleEngine.popen_uci(dirOtherEngine)
+    engine2.configure(dirOtherEngineOptions)
+    result = None
+    turn = random.randrange(0,1)
+    board = chess.Board(startingPosition)
+    while True:
+        outcome = board.outcome()
+        if outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
+            or outcome == chess.Outcome(chess.Termination.STALEMATE, None) or board.is_fifty_moves() or board.can_claim_threefold_repetition(): break
+        if turn == 0:
+            if board.turn == chess.WHITE:
+                result = engine.play(board, chess.engine.Limit(timeSeconds))
+            else:
+                result = engine2.play(board, chess.engine.Limit(timeSeconds))
+        else:
+            if board.turn == chess.BLACK:
+                result = engine.play(board, chess.engine.Limit(timeSeconds))
+            else:
+                result = engine2.play(board, chess.engine.Limit(timeSeconds))
+        """  """
+        board.push(result.move)
+    #game ended  
+    if board.is_fifty_moves() or board.can_claim_threefold_repetition() :
+        dict_result_game["draw"] += 1
+    else:
+        player_to_win = board.outcome().winner
+        if turn == 0:
+            if player_to_win == chess.WHITE:
+                dict_result_game["win"] += 1
+            elif player_to_win == chess.BLACK:
+                dict_result_game["loss"] += 1
+            else:
+                dict_result_game["draw"] += 1
+        else:
+            if player_to_win == chess.BLACK:
+                dict_result_game["win"] += 1
+            elif player_to_win == chess.WHITE:
+                dict_result_game["loss"] += 1
+            else:
+                dict_result_game["draw"] += 1
+
+    engine.quit()
+    engine2.quit()
+
+""" import logging
+
+Enable debug logging.
+logging.basicConfig(level=logging.DEBUG)
+     """
+
+
+dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\play.exe"
+dirStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\stockfish-windows-x86-64-avx2.exe"
+dirFairyStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fairy-stockfish_x86-64.exe"
+dirLC0 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\lc0-v0.31.1-windows-cpu-dnnl\lc0.exe"
+second_for_move = 0.1
+episodes = 10
+dict_result_game = {"win":0, "draw":0, "loss":0}
+
+

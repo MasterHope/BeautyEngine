@@ -4,6 +4,9 @@
 #include "findpattern.h"
 using namespace chess;
 
+//if you want to add some extras...
+//#define EXTRA_FUNCTIONALITIES
+
 PestoEvaluation::PestoEvaluation()
 {
     init_tables();
@@ -47,25 +50,29 @@ int PestoEvaluation::eval(Board &board)
             gamePhase += gamephaseInc[pc];
         }
     }
-    //added some functionalities
+    
+    #ifdef EXTRA_FUNCTIONALITIES
     int8_t kps_1 = kingPawnShield(board, board.sideToMove());
     int8_t kps_0 = kingPawnShield(board, OTHER(board.sideToMove()));
     int8_t pp = pawnsPenalities(board);
     int8_t mob = mobility(board);
     int8_t kvm_1 = kingVirtualMobility(board, board.sideToMove());
-    int8_t kvm_0 = kingVirtualMobility(board, OTHER(board.sideToMove()));
+    int8_t kvm_0 = kingVirtualMobility(board, OTHER(board.sideToMove())); */
+    mgScore += kps_1 - kps_0;
+    mgScore += mob;
+    mgScore -= pp;
+    mgScore -= kvm_1 - kvm_0;
+    egScore += kps_1 - kps_0;
+    egScore -= pp;
+    egScore -= kvm_1 - kvm_0;
+    egScore += mob;
+    #endif
 
     /* tapered eval */
     int mgScore = mg[board.sideToMove()] - mg[OTHER(board.sideToMove())];
-    /* mgScore += kps_1 - kps_0;
-    mgScore += mob;
-    mgScore -= pp;
-    mgScore -= kvm_1 - kvm_0; */
+    
     int egScore = eg[board.sideToMove()] - eg[OTHER(board.sideToMove())];
-    /* egScore += kps_1 - kps_0;
-    egScore -= pp;
-    egScore -= kvm_1 - kvm_0;
-    egScore += mob; */
+    
     
     int mgPhase = gamePhase;
     if (mgPhase > 24)

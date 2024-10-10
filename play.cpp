@@ -117,25 +117,31 @@ void uci_loop()
         else if (token == "position")
         {
             std::string option;
+            std::string line_fen; 
+            std::string fen;
+            std::string moves;
             is >> std::skipws >> option;
             if (option == "startpos")
             {
                 engine.curr_board->setFen(STARTINGFEN);
-                std::string moves;
                 is >> std::skipws >> moves;
-                if (!moves.empty())
-                {
-                    std::string move;
-                    while (is >> std::skipws >> move)
-                    {
-                        engine.curr_board->makeMove(uci::uciToMove(*engine.curr_board,move)); 
-                    }
-
+                if (moves.empty()){
+                    continue;
                 }
             } else if (option == "fen") {
-                std::string line_fen; 
                 getline(is, line_fen);
+                std::size_t pos = line_fen.find("moves");
+                if (pos != std::string::npos){
+                    fen = line_fen.substr(0, pos);
+                    moves = line_fen.substr(pos + 6, line_fen.length() - 1);
+                } 
                 engine.curr_board->setFen(line_fen);
+            }
+            std::istringstream movesStream(moves);
+            std::string move;
+            while (movesStream >> std::skipws >> move)
+            {
+                engine.curr_board->makeMove(uci::uciToMove(*engine.curr_board,move)); 
             }
         }
         else if (token == "ucinewgame")
