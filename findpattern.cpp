@@ -53,7 +53,7 @@ int8_t mobility(Board& board){
     movegen::legalmoves(moves, board);
     them = moves.size();
     board.unmakeNullMove();
-    return (us - them) * 10;
+    return (us - them);
 }
 
 int8_t kingPawnShield(Board& board, Color color){
