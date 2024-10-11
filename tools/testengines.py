@@ -18,7 +18,7 @@ fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_the
 
 
 class Tournament:
-    def __init__(self, number_matches, time_seconds_arr, dir_engine_test, *other_engine_dirs, other_engine_options = {}):
+    def __init__(self, number_matches, time_seconds_arr, dir_engine_test, other_engine_options = {},*other_engine_dirs):
         self.number_matches = number_matches
         self.time_seconds_arr = time_seconds_arr
         self.other_engine_dirs = other_engine_dirs
@@ -29,27 +29,27 @@ class Tournament:
     def run(self):
         for dir_engine_opponent in self.other_engine_dirs:
             for seconds_move in self.time_seconds_arr:
-                game_stats = GameStatistics(seconds_move)
+                round_stats = RoundStatistics(seconds_move, dir_engine_opponent)
                 for _ in range(self.number_matches):
                     game = Game(seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
                     game_result = game.play()
                     if game_result.result()=="1/2-1/2":
-                        game_stats.draws.append(game_result)
+                        round_stats.draws.append(game_result)
                     elif game_result.winner:
-                        game_stats.wins.append(game_result)
+                        round_stats.wins+=1
                     else:
-                        game_stats.losses.append(game_result)
-                self.statistics.append(game_stats)
+                        round_stats.losses+=1
+                self.statistics.append(round_stats)
 
-class GameStatistics:
+class RoundStatistics:
     def __init__(self, seconds_move, dir_other_engine):
         self.seconds_move = seconds_move
         self.engine_opponent = self.get_engine_name_from_dir(dir_other_engine)
-        self.wins = []
-        self.losses = []
+        self.wins = 0
+        self.losses = 0
         self.draws = []
 
-    def get_engine_name_from_dir(dir_other_engine):
+    def get_engine_name_from_dir(self,dir_other_engine):
         return path.basename(path.normpath(dir_other_engine))
         
 
@@ -68,11 +68,11 @@ class Game:
         result = None
         engine_test_turn = bool(random.getrandbits(1))
         board = chess.Board(starting_position)
-        outcome = board.outcome(True)
+        outcome = board.outcome(claim_draw=True)
         while not outcome:
             result = self.next_move(engine, engine2, engine_test_turn, board)
             board.push(result.move)
-            outcome = board.outcome(True)
+            outcome = board.outcome(claim_draw=True)
         """ game ended  
         these two conditions are treated in a separate way... (they are not checked from engine because we should claim for obtaining that.)
         we assume that if condition met, then we reached end of the game. """
@@ -100,6 +100,5 @@ class Game:
         engine2.quit()    
 
 
-game = Game(0.1, dirMyEngine, dirFairyStockfish, {"Skill level":4})
-end = game.play()
-print(end)
+t = Tournament(3,[0.1], dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
+t.run()
