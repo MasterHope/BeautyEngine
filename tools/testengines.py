@@ -3,7 +3,7 @@ import chess.engine
 import chess.pgn
 import sys
 import asyncio
-
+import os
 import random
 from tqdm import tqdm
 from os import listdir, path
@@ -17,6 +17,8 @@ dirLC0 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\lc0
 strongEngines = [dirStockfish, dirFairyStockfish, dirLC0]
 fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fair")]
 
+#removed due lc0 messages of logging...
+sys.stderr = open(os.devnull, 'w')
 
 class Tournament:
     def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
@@ -28,7 +30,7 @@ class Tournament:
         self.statistics = []
 
     def run(self):
-        pbar = tqdm(range(len(self.other_engine_dirs)))
+        pbar = tqdm(range(len(self.other_engine_dirs)), file=sys.stdout)
         for i in pbar:
             dir_engine_opponent = self.other_engine_dirs[i]
             engine_opponent = self.get_engine_name_from_dir(dir_engine_opponent)
