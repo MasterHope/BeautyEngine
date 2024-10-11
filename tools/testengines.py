@@ -28,9 +28,13 @@ class Tournament:
         self.statistics = []
 
     def run(self):
-        for dir_engine_opponent in self.other_engine_dirs:
-            round_stats = RoundStatistics(self.seconds_move, dir_engine_opponent)
-            for _ in range(self.number_matches):
+        pbar = tqdm(range(len(self.other_engine_dirs)))
+        for i in pbar:
+            dir_engine_opponent = self.other_engine_dirs[i]
+            engine_opponent = self.get_engine_name_from_dir(dir_engine_opponent)
+            round_stats = RoundStatistics(self.seconds_move, engine_opponent)
+            for j in range(self.number_matches):
+                pbar.set_description("Playing against %s match number %d/%d" % (engine_opponent , j, self.number_matches) )   
                 game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
                 game_result = game.play()
                 if game_result.result()=="1/2-1/2":
@@ -40,17 +44,18 @@ class Tournament:
                 else:
                     round_stats.losses+=1
             self.statistics.append(round_stats)
+    
+    def get_engine_name_from_dir(self,dir_other_engine):
+        return path.basename(path.normpath(dir_other_engine)).split('.')[0]
 
 class RoundStatistics:
-    def __init__(self, seconds_move, dir_other_engine):
+    def __init__(self, seconds_move, engine_opponent):
         self.seconds_move = seconds_move
-        self.engine_opponent = self.get_engine_name_from_dir(dir_other_engine)
+        self.engine_opponent = engine_opponent
         self.wins = 0
         self.losses = 0
         self.draws = []
 
-    def get_engine_name_from_dir(self,dir_other_engine):
-        return path.basename(path.normpath(dir_other_engine))
         
 
 
@@ -97,6 +102,6 @@ class Game:
         engine2.quit()    
 
 
-t = Tournament(3,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
+t = Tournament(10,0.05, dirMyEngine, {},*strongEngines)
 t.run()
 plot_wins(t.statistics, t.number_matches)
