@@ -7,7 +7,7 @@ import asyncio
 import random
 from tqdm import tqdm
 
-def engine_test(dirMyEngine, dirOtherEngine, timeSeconds, dirOtherEngineOptions, dict_result_game, startingPosition):
+def engine_test(dirMyEngine, dirOtherEngine, timeSeconds, dirOtherEngineOptions, dict_result_game, startingPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
     engine = chess.engine.SimpleEngine.popen_uci(dirMyEngine)
     engine2 = chess.engine.SimpleEngine.popen_uci(dirOtherEngine)
     engine2.configure(dirOtherEngineOptions)
