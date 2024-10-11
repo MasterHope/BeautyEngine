@@ -36,7 +36,7 @@ class Tournament:
             engine_opponent = self.get_engine_name_from_dir(dir_engine_opponent)
             round_stats = RoundStatistics(self.seconds_move, engine_opponent)
             for j in range(self.number_matches):
-                pbar.set_description("Playing against %s match number %d/%d" % (engine_opponent , j, self.number_matches) )   
+                pbar.set_description("Playing against %s match number %d/%d" % (engine_opponent , j+1, self.number_matches) )   
                 game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
                 game_result = game.play()
                 if game_result.result()=="1/2-1/2":
