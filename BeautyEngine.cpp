@@ -10,6 +10,7 @@
 #include <thread>
 #include "play.h"
 #include "findpattern.h"
+#include "BeautyEngine.h"
 
 using namespace chess;
 //draw problem
@@ -120,22 +121,30 @@ void uci_loop()
             std::string line_fen; 
             std::string fen;
             std::string moves;
+            std::size_t pos;
             is >> std::skipws >> option;
             if (option == "startpos")
             {
                 engine.curr_board->setFen(STARTINGFEN);
-                is >> std::skipws >> moves;
-                if (moves.empty()){
-                    continue;
+                getline(is, line_fen);
+                pos = line_fen.find("moves");
+                if (pos != std::string::npos){
+                    moves = line_fen.substr(pos + 6, line_fen.length() - 1);
                 }
             } else if (option == "fen") {
                 getline(is, line_fen);
-                std::size_t pos = line_fen.find("moves");
+                pos = line_fen.find("moves");
                 if (pos != std::string::npos){
-                    fen = line_fen.substr(0, pos);
+                    fen = line_fen.substr(1, pos);
                     moves = line_fen.substr(pos + 6, line_fen.length() - 1);
-                } 
-                engine.curr_board->setFen(line_fen);
+                } else {
+                    fen = line_fen.substr(1, line_fen.length() - 1);
+                }
+                engine.curr_board->setFen(fen);
+            }
+            if (notMoves(pos))
+            {
+                continue;
             }
             std::istringstream movesStream(moves);
             std::string move;
@@ -189,6 +198,10 @@ void uci_loop()
     }
 }
 
+bool notMoves(std::size_t pos)
+{
+    return pos == std::string::npos;
+}
 int main()
 {
     uci_loop();
