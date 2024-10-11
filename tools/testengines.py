@@ -8,11 +8,6 @@ import random
 from tqdm import tqdm
 from os import listdir, path
 
-import logging
-
-# Enable debug logging.
-logging.basicConfig(level=logging.DEBUG)
-
 #used dir
 dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\BeautyEngine.exe"
 dirStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\stockfish-windows-x86-64-avx2.exe"
@@ -84,7 +79,7 @@ class Game:
                 self.draw = True
         engine.quit()
         engine2.quit()
-        return outcome
+        return chess.Outcome(outcome.termination, self.win)
 
     def game_ended(self, board, outcome):
         return outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
@@ -94,3 +89,4 @@ class Game:
 
 game = Game(0.1, dirMyEngine, dirFairyStockfish, {"Skill level":4})
 end = game.play()
+print(end)
