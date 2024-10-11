@@ -22,7 +22,6 @@ class Engine{
         Engine();
         void position(std::string& fen);
         void go();
-        void quit() {};
         void make_move(Move move);
         void setTime(int timems){this->negamax.get()->time_move_ms = timems;};
         void reset();

@@ -53,14 +53,7 @@ def engine_test(dirMyEngine, dirOtherEngine, timeSeconds, dirOtherEngineOptions,
     engine.quit()
     engine2.quit()
 
-""" import logging
-
-Enable debug logging.
-logging.basicConfig(level=logging.DEBUG)
-     """
-
-
-dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\play.exe"
+dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\BeautyEngine.exe"
 dirStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\stockfish-windows-x86-64-avx2.exe"
 dirFairyStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fairy-stockfish_x86-64.exe"
 dirLC0 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\lc0-v0.31.1-windows-cpu-dnnl\lc0.exe"
