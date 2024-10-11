@@ -7,6 +7,7 @@ import asyncio
 import random
 from tqdm import tqdm
 from os import listdir, path
+from plotting import plot_wins
 
 #used dir
 dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\BeautyEngine.exe"
@@ -18,9 +19,9 @@ fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_the
 
 
 class Tournament:
-    def __init__(self, number_matches, time_seconds_arr, dir_engine_test, other_engine_options = {},*other_engine_dirs):
+    def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
         self.number_matches = number_matches
-        self.time_seconds_arr = time_seconds_arr
+        self.seconds_move = seconds_move
         self.other_engine_dirs = other_engine_dirs
         self.dir_engine_test = dir_engine_test
         self.other_engine_options = other_engine_options
@@ -28,18 +29,17 @@ class Tournament:
 
     def run(self):
         for dir_engine_opponent in self.other_engine_dirs:
-            for seconds_move in self.time_seconds_arr:
-                round_stats = RoundStatistics(seconds_move, dir_engine_opponent)
-                for _ in range(self.number_matches):
-                    game = Game(seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
-                    game_result = game.play()
-                    if game_result.result()=="1/2-1/2":
-                        round_stats.draws.append(game_result)
-                    elif game_result.winner:
-                        round_stats.wins+=1
-                    else:
-                        round_stats.losses+=1
-                self.statistics.append(round_stats)
+            round_stats = RoundStatistics(self.seconds_move, dir_engine_opponent)
+            for _ in range(self.number_matches):
+                game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
+                game_result = game.play()
+                if game_result.result()=="1/2-1/2":
+                    round_stats.draws.append(game_result)
+                elif game_result.winner:
+                    round_stats.wins+=1
+                else:
+                    round_stats.losses+=1
+            self.statistics.append(round_stats)
 
 class RoundStatistics:
     def __init__(self, seconds_move, dir_other_engine):
@@ -97,5 +97,6 @@ class Game:
         engine2.quit()    
 
 
-t = Tournament(3,[0.1], dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
+t = Tournament(3,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
 t.run()
+plot_wins(t.statistics, t.number_matches)
