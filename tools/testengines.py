@@ -24,18 +24,34 @@ class Tournament:
         self.other_engine_dirs = other_engine_dirs
         self.dir_engine_test = dir_engine_test
         self.other_engine_options = other_engine_options
+        self.statistics = []
 
     def run(self):
         for dir_engine_opponent in self.other_engine_dirs:
             for seconds_move in self.time_seconds_arr:
+                game_stats = GameStatistics(seconds_move)
                 for _ in range(self.number_matches):
                     game = Game(seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
                     game_result = game.play()
-                    
+                    if game_result.result()=="1/2-1/2":
+                        game_stats.draws.append(game_result)
+                    elif game_result.winner:
+                        game_stats.wins.append(game_result)
+                    else:
+                        game_stats.losses.append(game_result)
+                self.statistics.append(game_stats)
+
+class GameStatistics:
+    def __init__(self, seconds_move, dir_other_engine):
+        self.seconds_move = seconds_move
+        self.engine_opponent = self.get_engine_name_from_dir(dir_other_engine)
+        self.wins = []
+        self.losses = []
+        self.draws = []
 
     def get_engine_name_from_dir(dir_other_engine):
         return path.basename(path.normpath(dir_other_engine))
-
+        
 
 
 class Game:
@@ -52,20 +68,14 @@ class Game:
         result = None
         engine_test_turn = bool(random.getrandbits(1))
         board = chess.Board(starting_position)
-        outcome = board.outcome()
-        while not self.game_ended(board, outcome):
+        outcome = board.outcome(True)
+        while not outcome:
             result = self.next_move(engine, engine2, engine_test_turn, board)
             board.push(result.move)
-            outcome = board.outcome()
+            outcome = board.outcome(True)
         """ game ended  
         these two conditions are treated in a separate way... (they are not checked from engine because we should claim for obtaining that.)
         we assume that if condition met, then we reached end of the game. """
-        if board.is_fifty_moves() :
-            self.close_engines(engine, engine2)
-            return chess.Outcome(chess.Termination.FIFTY_MOVES, None)
-        if board.can_claim_threefold_repetition() :
-            self.close_engines(engine, engine2)
-            return chess.Outcome(chess.Termination.THREEFOLD_REPETITION, None)
         self.close_engines(engine, engine2)
         if not outcome.winner:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
@@ -87,12 +97,7 @@ class Game:
 
     def close_engines(self, engine, engine2):
         engine.quit()
-        engine2.quit()
-
-    def game_ended(self, board, outcome):
-        return outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
-                or outcome == chess.Outcome(chess.Termination.STALEMATE, None) or board.is_fifty_moves() or board.can_claim_threefold_repetition()
-        
+        engine2.quit()    
 
 
 game = Game(0.1, dirMyEngine, dirFairyStockfish, {"Skill level":4})
