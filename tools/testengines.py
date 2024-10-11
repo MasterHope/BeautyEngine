@@ -73,9 +73,6 @@ class Game:
             result = self.next_move(engine, engine2, engine_test_turn, board)
             board.push(result.move)
             outcome = board.outcome(claim_draw=True)
-        """ game ended  
-        these two conditions are treated in a separate way... (they are not checked from engine because we should claim for obtaining that.)
-        we assume that if condition met, then we reached end of the game. """
         self.close_engines(engine, engine2)
         if not outcome.winner:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
