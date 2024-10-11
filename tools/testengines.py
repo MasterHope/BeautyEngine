@@ -56,12 +56,12 @@ class Game:
             self.draw = True
             engine.quit()
             engine2.quit()
-            return chess.Outcome(chess.Termination.FIFTY_MOVES)
+            return chess.Outcome(chess.Termination.FIFTY_MOVES, None)
         if board.can_claim_threefold_repetition() :
             self.draw = True
             engine.quit()
             engine2.quit()
-            return chess.Outcome(chess.Termination.THREEFOLD_REPETITION)
+            return chess.Outcome(chess.Termination.THREEFOLD_REPETITION, None)
         player_to_win = outcome.winner
         if turn == 0:
             if player_to_win == chess.WHITE:
@@ -79,7 +79,10 @@ class Game:
                 self.draw = True
         engine.quit()
         engine2.quit()
-        return chess.Outcome(outcome.termination, self.win)
+        if not self.draw:
+            return chess.Outcome(outcome.termination, self.win)
+        else:
+            return outcome
 
     def game_ended(self, board, outcome):
         return outcome == chess.Outcome(chess.Termination.CHECKMATE, not board.turn) or outcome == chess.Outcome(chess.Termination.INSUFFICIENT_MATERIAL, None) \
