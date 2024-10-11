@@ -18,10 +18,24 @@ fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_the
 
 
 class Tournament:
-    def __init__(self, number_matches, time_seconds_arr, dir_engine_test, *other_engine_dirs):
+    def __init__(self, number_matches, time_seconds_arr, dir_engine_test, *other_engine_dirs, other_engine_options = {}):
         self.number_matches = number_matches
         self.time_seconds_arr = time_seconds_arr
         self.other_engine_dirs = other_engine_dirs
+        self.dir_engine_test = dir_engine_test
+        self.other_engine_options = other_engine_options
+
+    def run(self):
+        for dir_engine_opponent in self.other_engine_dirs:
+            for seconds_move in self.time_seconds_arr:
+                for _ in range(self.number_matches):
+                    game = Game(seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
+                    game_result = game.play()
+                    
+
+    def get_engine_name_from_dir(dir_other_engine):
+        return path.basename(path.normpath(dir_other_engine))
+
 
 
 class Game:
@@ -29,7 +43,6 @@ class Game:
         self.seconds_move = seconds_move
         self.dir_engine_to_test = dir_engine_test
         self.dir_other_engine = dir_other_engine
-        self.other_engine_name = path.basename(path.normpath(dir_other_engine))
         self.other_engine_options = other_engine_options
 
     def play(self, starting_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
