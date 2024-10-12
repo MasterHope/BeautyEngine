@@ -30,8 +30,8 @@ class Tournament:
         self.statistics = []
 
     def run(self):
-        pbar = tqdm(range(len(self.other_engine_dirs)), file=sys.stdout)
-        for i in pbar:
+        pbar = tqdm(range(len(self.other_engine_dirs)), file=sys.stdout, total=(len(self.other_engine_dirs)*self.number_matches))
+        for i in range(len(self.other_engine_dirs)):
             dir_engine_opponent = self.other_engine_dirs[i]
             engine_opponent = self.get_engine_name_from_dir(dir_engine_opponent)
             round_stats = RoundStatistics(self.seconds_move, engine_opponent)
@@ -45,7 +45,10 @@ class Tournament:
                     round_stats.wins+=1
                 else:
                     round_stats.losses+=1
+                pbar.update()
+            i+=1
             self.statistics.append(round_stats)
+        pbar.close()
     
     def get_engine_name_from_dir(self,dir_other_engine):
         return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
@@ -104,6 +107,6 @@ class Game:
         engine2.quit()    
 
 
-t = Tournament(10,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
+t = Tournament(50,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
 t.run()
 plot_wins(t.statistics, t.number_matches)

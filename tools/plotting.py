@@ -22,7 +22,7 @@ def plot_wins(tournamentStats, number_matches):
     ax.set_title('Game wins/draws/losses with ' +  str(tournamentStats[0].seconds_move) + ' seconds')
     ax.set_xticks(x + width, engines)
     ax.legend(loc='upper left', ncols=len(engines))
-    ax.set_ylim(0, number_matches)
+    ax.set_ylim(0, number_matches + 2)
     plt.show()
 
 
