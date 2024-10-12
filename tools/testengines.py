@@ -92,6 +92,8 @@ class Game:
             outcome = board.outcome(claim_draw=True)
         self.close_engines(engine, engine2)
         self.pgn.headers["Result"] = outcome.result()
+        with open(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\tools\games\games.pgn", "a") as f:
+            print(self.pgn, file=f, end="\n\n")
         if outcome.winner != None:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
         else:
