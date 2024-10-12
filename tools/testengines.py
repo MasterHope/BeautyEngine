@@ -8,6 +8,7 @@ import random
 from tqdm import tqdm
 from os import listdir, path
 from plotting import plot_wins
+from datetime import datetime
 
 #used dir
 dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\BeautyEngine.exe"
@@ -18,7 +19,7 @@ strongEngines = [dirStockfish, dirFairyStockfish, dirLC0]
 fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fair")]
 
 #removed due lc0 messages of logging...
-sys.stderr = open(os.devnull, 'w')
+""" sys.stderr = open(os.devnull, 'w') """
 
 class Tournament:
     def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
@@ -33,11 +34,17 @@ class Tournament:
         pbar = tqdm(range(len(self.other_engine_dirs)), file=sys.stdout, total=(len(self.other_engine_dirs)*self.number_matches))
         for i in range(len(self.other_engine_dirs)):
             dir_engine_opponent = self.other_engine_dirs[i]
-            engine_opponent = self.get_engine_name_from_dir(dir_engine_opponent)
+            engine_opponent = get_engine_name_from_dir(dir_engine_opponent)
             round_stats = RoundStatistics(self.seconds_move, engine_opponent)
+            info = {
+                "Event" : "Tournament for my engine",
+                "Date" : datetime.today().strftime('%d-%m-%Y'),
+                "Site" : "Italy"
+            }
             for j in range(self.number_matches):
+                info["Round"] = j + 1
                 pbar.set_description("Playing against %s match number %d/%d" % (engine_opponent , j+1, self.number_matches) )   
-                game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options)
+                game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options, info)
                 game_result = game.play()
                 if game_result.result()=="1/2-1/2":
                     round_stats.draws.append(game_result)
@@ -50,8 +57,6 @@ class Tournament:
             self.statistics.append(round_stats)
         pbar.close()
     
-    def get_engine_name_from_dir(self,dir_other_engine):
-        return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
 
 class RoundStatistics:
     def __init__(self, seconds_move, engine_opponent):
@@ -65,29 +70,54 @@ class RoundStatistics:
 
 
 class Game:
-    def __init__(self, seconds_move, dir_engine_test, dir_other_engine, other_engine_options):
+    def __init__(self, seconds_move, dir_engine_test, dir_other_engine, other_engine_options, info):
         self.seconds_move = seconds_move
         self.dir_engine_to_test = dir_engine_test
         self.dir_other_engine = dir_other_engine
         self.other_engine_options = other_engine_options
+        self.pgn = None
+        self.info = info
 
     def play(self, starting_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
-        engine = chess.engine.SimpleEngine.popen_uci(self.dir_engine_to_test)
-        engine2 = chess.engine.SimpleEngine.popen_uci(self.dir_other_engine)
-        engine2.configure(self.other_engine_options)
+        engine, engine2 = self.setting_engines()
         result = None
         engine_test_turn = bool(random.getrandbits(1))
         board = chess.Board(starting_position)
+        node = self.init_pgn(starting_position, engine_test_turn)
         outcome = board.outcome(claim_draw=True)
         while not outcome:
             result = self.next_move(engine, engine2, engine_test_turn, board)
             board.push(result.move)
+            node = node.add_variation(result.move)
             outcome = board.outcome(claim_draw=True)
         self.close_engines(engine, engine2)
+        self.pgn.headers["Result"] = outcome.result()
         if outcome.winner != None:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
         else:
             return outcome
+
+    def init_pgn(self, starting_position, engine_test_turn):
+        self.pgn = chess.pgn.Game()
+        self.pgn.setup(starting_position)
+        self.pgn.headers["Event"] = self.info["Event"]
+        self.pgn.headers["Date"] = self.info["Date"]
+        self.pgn.headers["Round"] = self.info["Round"]
+        self.pgn.headers["Site"] = self.info["Site"]
+        if engine_test_turn == chess.WHITE:
+            self.pgn.headers["White"] = get_engine_name_from_dir(self.dir_engine_to_test)
+            self.pgn.headers["Black"] = get_engine_name_from_dir(self.dir_other_engine)
+        else:
+            self.pgn.headers["Black"] = get_engine_name_from_dir(self.dir_engine_to_test)
+            self.pgn.headers["White"] = get_engine_name_from_dir(self.dir_other_engine)
+        node = self.pgn
+        return node
+
+    def setting_engines(self):
+        engine = chess.engine.SimpleEngine.popen_uci(self.dir_engine_to_test)
+        engine2 = chess.engine.SimpleEngine.popen_uci(self.dir_other_engine)
+        engine2.configure(self.other_engine_options)
+        return engine,engine2
 
     def next_move(self, engine, engine2, engine_test_turn, board):
         if engine_test_turn == chess.WHITE:
@@ -107,6 +137,10 @@ class Game:
         engine2.quit()    
 
 
-t = Tournament(50,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
+def get_engine_name_from_dir(dir_other_engine):
+    return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
+
+
+t = Tournament(2,0.1, dirMyEngine, {}, *strongEngines)
 t.run()
 plot_wins(t.statistics, t.number_matches)
