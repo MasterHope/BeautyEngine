@@ -16,7 +16,7 @@ all_engine_test = [fn for fn in glob.glob("engines/**/*.exe", recursive=True)]
 # myEngineDir
 my_engine = "BeautyEngine.exe"
 # removed due lc0 messages of logging...
-sys.stderr = open(os.devnull, 'w')
+# sys.stderr = open(os.devnull, 'w')
 
 
 class Tournament:
@@ -65,7 +65,7 @@ class Tournament:
                 )
                 game_result = game.play()
                 if game_result.result() == "1/2-1/2":
-                    self.draws+=1
+                    round_stats.draws+=1
                     round_stats.draws_reasons[game_result.termination] += 1
                 elif game_result.winner:
                     round_stats.wins += 1
@@ -191,7 +191,7 @@ def get_engine_name_from_dir(dir_other_engine):
     )
 
 
-t = Tournament(4, 0.1, my_engine, {}, *all_engine_test)
+t = Tournament(2, 0.1, my_engine, {}, *all_engine_test)
 t.run()
 plot_wins(t.statistics, t.number_matches)
 plot_draws(t.statistics, t.number_matches)
