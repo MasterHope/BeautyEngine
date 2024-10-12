@@ -48,7 +48,7 @@ class Tournament:
             self.statistics.append(round_stats)
     
     def get_engine_name_from_dir(self,dir_other_engine):
-        return path.basename(path.normpath(dir_other_engine)).split('.')[0]
+        return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
 
 class RoundStatistics:
     def __init__(self, seconds_move, engine_opponent):
@@ -81,7 +81,7 @@ class Game:
             board.push(result.move)
             outcome = board.outcome(claim_draw=True)
         self.close_engines(engine, engine2)
-        if not outcome.winner:
+        if outcome.winner != None:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
         else:
             return outcome
@@ -104,6 +104,6 @@ class Game:
         engine2.quit()    
 
 
-t = Tournament(10,0.05, dirMyEngine, {},*strongEngines)
+t = Tournament(10,0.1, dirMyEngine, {"Skill level":4},dirFairyStockfish, dirStockfish)
 t.run()
 plot_wins(t.statistics, t.number_matches)

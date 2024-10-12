@@ -50,6 +50,9 @@ int PestoEvaluation::eval(Board &board)
             gamePhase += gamephaseInc[pc];
         }
     }
+    /* tapered eval */
+    int mgScore = mg[board.sideToMove()] - mg[OTHER(board.sideToMove())];
+    int egScore = eg[board.sideToMove()] - eg[OTHER(board.sideToMove())];
     
     #ifdef EXTRA_FUNCTIONALITIES
     int8_t kps_1 = kingPawnShield(board, board.sideToMove());
@@ -57,7 +60,7 @@ int PestoEvaluation::eval(Board &board)
     int8_t pp = pawnsPenalities(board);
     int8_t mob = mobility(board);
     int8_t kvm_1 = kingVirtualMobility(board, board.sideToMove());
-    int8_t kvm_0 = kingVirtualMobility(board, OTHER(board.sideToMove())); */
+    int8_t kvm_0 = kingVirtualMobility(board, OTHER(board.sideToMove()));
     mgScore += kps_1 - kps_0;
     mgScore += mob;
     mgScore -= pp;
@@ -67,12 +70,6 @@ int PestoEvaluation::eval(Board &board)
     egScore -= kvm_1 - kvm_0;
     egScore += mob;
     #endif
-
-    /* tapered eval */
-    int mgScore = mg[board.sideToMove()] - mg[OTHER(board.sideToMove())];
-    
-    int egScore = eg[board.sideToMove()] - eg[OTHER(board.sideToMove())];
-    
     
     int mgPhase = gamePhase;
     if (mgPhase > 24)

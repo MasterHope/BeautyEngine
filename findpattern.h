@@ -5,6 +5,11 @@ using namespace chess;
 
 
 enum PAWN_PENALITIES{DOUBLED, BLOCKED, ISOLATED};
+static const int KING_PAWN = 1;
+static const int KING_KNIGHT = 2;
+static const int KING_BISHOP = 2;
+static const int KING_ROOK = 3;
+static const int KING_QUEEN = 5;
 
 uint64_t get_file_bitboard(int file);
 std::array<int,3> pawns_structure(Board& board, Color color);
