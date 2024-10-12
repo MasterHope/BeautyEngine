@@ -2,24 +2,21 @@ import chess
 import chess.engine
 import chess.pgn
 import sys
-import asyncio
 import os
+import glob
 import random
 from tqdm import tqdm
-from os import listdir, path
+from os import  path
 from plotting import plot_wins
 from datetime import datetime
 
-#used dir
-dirMyEngine = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\BeautyEngine.exe"
-dirStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\stockfish-windows-x86-64-avx2.exe"
-dirFairyStockfish = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fairy-stockfish_x86-64.exe"
-dirLC0 = r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\lc0-v0.31.1-windows-cpu-dnnl\lc0.exe"
-strongEngines = [dirStockfish, dirFairyStockfish, dirLC0]
-fairEnginesDir = [f for f in listdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\engines\fair")]
 
+os.chdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine")
+all_engine_test = [fn for fn in glob.glob("engines/**/*.exe", recursive=True)]
+#myEngineDir
+my_engine = "BeautyEngine.exe"
 #removed due lc0 messages of logging...
-""" sys.stderr = open(os.devnull, 'w') """
+sys.stderr = open(os.devnull, 'w')
 
 class Tournament:
     def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
@@ -92,7 +89,7 @@ class Game:
             outcome = board.outcome(claim_draw=True)
         self.close_engines(engine, engine2)
         self.pgn.headers["Result"] = outcome.result()
-        with open(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\tools\games\games.pgn", "a") as f:
+        with open("tools/games/games.pgn", "a") as f:
             print(self.pgn, file=f, end="\n\n")
         if outcome.winner != None:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
@@ -143,6 +140,6 @@ def get_engine_name_from_dir(dir_other_engine):
     return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
 
 
-t = Tournament(2,0.1, dirMyEngine, {}, *strongEngines)
+t = Tournament(2,0.1, my_engine, {}, *all_engine_test)
 t.run()
 plot_wins(t.statistics, t.number_matches)
