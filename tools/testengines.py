@@ -6,20 +6,28 @@ import os
 import glob
 import random
 from tqdm import tqdm
-from os import  path
-from plotting import plot_wins
+from os import path
+from plotting import plot_wins, plot_draws
 from datetime import datetime
 
 
 os.chdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine")
 all_engine_test = [fn for fn in glob.glob("engines/**/*.exe", recursive=True)]
-#myEngineDir
+# myEngineDir
 my_engine = "BeautyEngine.exe"
-#removed due lc0 messages of logging...
-#sys.stderr = open(os.devnull, 'w')
+# removed due lc0 messages of logging...
+sys.stderr = open(os.devnull, 'w')
+
 
 class Tournament:
-    def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
+    def __init__(
+        self,
+        number_matches,
+        seconds_move,
+        dir_engine_test,
+        other_engine_options={},
+        *other_engine_dirs
+    ):
         self.number_matches = number_matches
         self.seconds_move = seconds_move
         self.other_engine_dirs = other_engine_dirs
@@ -28,32 +36,46 @@ class Tournament:
         self.statistics = []
 
     def run(self):
-        pbar = tqdm(range(len(self.other_engine_dirs)), file=sys.stdout, total=(len(self.other_engine_dirs)*self.number_matches))
+        pbar = tqdm(
+            range(len(self.other_engine_dirs)),
+            file=sys.stdout,
+            total=(len(self.other_engine_dirs) * self.number_matches),
+        )
         for i in range(len(self.other_engine_dirs)):
             dir_engine_opponent = self.other_engine_dirs[i]
             engine_opponent = get_engine_name_from_dir(dir_engine_opponent)
             round_stats = RoundStatistics(self.seconds_move, engine_opponent)
             info = {
-                "Event" : "Tournament for my engine",
-                "Date" : datetime.today().strftime('%d-%m-%Y'),
-                "Site" : "Italy"
+                "Event": "Tournament for my engine",
+                "Date": datetime.today().strftime("%d-%m-%Y"),
+                "Site": "Italy",
             }
             for j in range(self.number_matches):
                 info["Round"] = j + 1
-                pbar.set_description("Playing against %s match number %d/%d" % (engine_opponent , j+1, self.number_matches) )   
-                game = Game(self.seconds_move, self.dir_engine_test, dir_engine_opponent, self.other_engine_options, info)
+                pbar.set_description(
+                    "Playing against %s match number %d/%d"
+                    % (engine_opponent, j + 1, self.number_matches)
+                )
+                game = Game(
+                    self.seconds_move,
+                    self.dir_engine_test,
+                    dir_engine_opponent,
+                    self.other_engine_options,
+                    info,
+                )
                 game_result = game.play()
-                if game_result.result()=="1/2-1/2":
-                    round_stats.draws.append(game_result)
+                if game_result.result() == "1/2-1/2":
+                    self.draws+=1
+                    round_stats.draws_reasons[game_result.termination] += 1
                 elif game_result.winner:
-                    round_stats.wins+=1
+                    round_stats.wins += 1
                 else:
-                    round_stats.losses+=1
+                    round_stats.losses += 1
                 pbar.update()
-            i+=1
+            i += 1
             self.statistics.append(round_stats)
         pbar.close()
-    
+
 
 class RoundStatistics:
     def __init__(self, seconds_move, engine_opponent):
@@ -61,13 +83,24 @@ class RoundStatistics:
         self.engine_opponent = engine_opponent
         self.wins = 0
         self.losses = 0
-        self.draws = []
-
-        
+        self.draws = 0
+        self.draws_reasons = {
+            chess.Termination.THREEFOLD_REPETITION: 0,
+            chess.Termination.FIFTY_MOVES: 0,
+            chess.Termination.STALEMATE: 0,
+            chess.Termination.INSUFFICIENT_MATERIAL: 0,
+        }
 
 
 class Game:
-    def __init__(self, seconds_move, dir_engine_test, dir_other_engine, other_engine_options, info):
+    def __init__(
+        self,
+        seconds_move,
+        dir_engine_test,
+        dir_other_engine,
+        other_engine_options,
+        info,
+    ):
         self.seconds_move = seconds_move
         self.dir_engine_to_test = dir_engine_test
         self.dir_other_engine = dir_other_engine
@@ -75,7 +108,10 @@ class Game:
         self.pgn = None
         self.info = info
 
-    def play(self, starting_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
+    def play(
+        self,
+        starting_position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    ):
         engine, engine2 = self.setting_engines()
         result = None
         engine_test_turn = bool(random.getrandbits(1))
@@ -90,16 +126,18 @@ class Game:
         self.close_engines(engine, engine2)
         self.pgn.headers["Result"] = outcome.result()
         filename = "tools/games/games_" + str(self.seconds_move) + ".pgn"
-        #https://stackoverflow.com/questions/20432912/writing-to-a-new-file-if-it-doesnt-exist-and-appending-to-a-file-if-it-does
-        append_write = ''
-        if (os.path.exists):
-            append_write = 'a'
+        # https://stackoverflow.com/questions/20432912/writing-to-a-new-file-if-it-doesnt-exist-and-appending-to-a-file-if-it-does
+        append_write = ""
+        if os.path.exists:
+            append_write = "a"
         else:
-            append_write = 'w'
+            append_write = "w"
         with open(filename, append_write) as f:
             print(self.pgn, file=f, end="\n\n")
         if outcome.winner != None:
-            return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
+            return chess.Outcome(
+                outcome.termination, outcome.winner == engine_test_turn
+            )
         else:
             return outcome
 
@@ -111,10 +149,14 @@ class Game:
         self.pgn.headers["Round"] = self.info["Round"]
         self.pgn.headers["Site"] = self.info["Site"]
         if engine_test_turn == chess.WHITE:
-            self.pgn.headers["White"] = get_engine_name_from_dir(self.dir_engine_to_test)
+            self.pgn.headers["White"] = get_engine_name_from_dir(
+                self.dir_engine_to_test
+            )
             self.pgn.headers["Black"] = get_engine_name_from_dir(self.dir_other_engine)
         else:
-            self.pgn.headers["Black"] = get_engine_name_from_dir(self.dir_engine_to_test)
+            self.pgn.headers["Black"] = get_engine_name_from_dir(
+                self.dir_engine_to_test
+            )
             self.pgn.headers["White"] = get_engine_name_from_dir(self.dir_other_engine)
         node = self.pgn
         return node
@@ -123,7 +165,7 @@ class Game:
         engine = chess.engine.SimpleEngine.popen_uci(self.dir_engine_to_test)
         engine2 = chess.engine.SimpleEngine.popen_uci(self.dir_other_engine)
         engine2.configure(self.other_engine_options)
-        return engine,engine2
+        return engine, engine2
 
     def next_move(self, engine, engine2, engine_test_turn, board):
         if engine_test_turn == chess.WHITE:
@@ -140,13 +182,16 @@ class Game:
 
     def close_engines(self, engine, engine2):
         engine.quit()
-        engine2.quit()    
+        engine2.quit()
 
 
 def get_engine_name_from_dir(dir_other_engine):
-    return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
+    return (
+        path.basename(path.normpath(dir_other_engine)).replace("-", ".").split(".")[0]
+    )
 
 
-t = Tournament(1,0.1, my_engine, {}, *all_engine_test)
+t = Tournament(4, 0.1, my_engine, {}, *all_engine_test)
 t.run()
 plot_wins(t.statistics, t.number_matches)
+plot_draws(t.statistics, t.number_matches)
