@@ -5,7 +5,7 @@
 using namespace chess;
 
 //if you want to add some extras...
-//#define EXTRA_FUNCTIONALITIES
+#define EXTRA_FUNCTIONALITIES
 
 PestoEvaluation::PestoEvaluation()
 {

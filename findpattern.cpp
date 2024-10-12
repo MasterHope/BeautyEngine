@@ -11,8 +11,8 @@ uint64_t get_file_bitboard(int file) {
            (1ULL << (file + 32)) | (1ULL << (file + 40)) | (1ULL << (file + 48)) | (1ULL << (file + 56));
 }
 
-std::array<int,3> pawns_structure(Board& board, Color color){
-    std::array<int, 3> pawns_structure = std::array<int, 3>();
+int8_t pawnsPenalitiesColor(Board& board, Color color){
+    int8_t pawn_penality = 0;
     auto occ = board.pieces(PieceType::PAWN, color);
     auto occ_other = board.us(~color);
     for (int file = 0; file < 8; file++){
@@ -20,28 +20,17 @@ std::array<int,3> pawns_structure(Board& board, Color color){
         auto par_result_opp = occ_other & get_file_bitboard(file);
         //doubled pawn check
         if (attacks::shift<Direction::NORTH>(par_result) & par_result || attacks::shift<Direction::SOUTH>(par_result) & par_result){
-            pawns_structure[DOUBLED]++;
+            pawn_penality+=pawns_penalities[DOUBLED];
         
         //blocked pawn check
         }  else if (par_result_opp & attacks::shift<Direction::NORTH>(par_result)){
-            pawns_structure[BLOCKED]++;
+            pawn_penality+=pawns_penalities[BLOCKED]++;
         //isolated pawn
         } else if ( par_result && ((occ & get_file_bitboard(file - 1)) ^ (occ & get_file_bitboard(file + 1))) ){
-            pawns_structure[ISOLATED]++;
+            pawn_penality+=pawns_penalities[ISOLATED]++;
         }
     }
-    return pawns_structure;
-}
-
-
-
-int8_t pawnsPenalitiesColor(Board& board, Color color){
-    std::array<int, 3> pawns = pawns_structure(board, color);
-    int8_t penality = 0;
-    for (int i = DOUBLED; i <= ISOLATED; i++){
-        penality+=pawns[i] * pawns_penalities[i];
-    }
-    return penality;
+    return pawn_penality;
 }
 
 int8_t pawnsPenalities(Board& board){
@@ -85,11 +74,12 @@ int8_t kingVirtualMobility(Board& board, Color color){
     int16_t attacks_from_other_pieces = 0;
     Square kingSq = board.kingSq(color);
     auto occ = board.occ();
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::PAWN, ~color)).getBits()) * KING_PAWN;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * KING_KNIGHT;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::BISHOP, ~color)).getBits()) * KING_BISHOP;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::ROOK, ~color)).getBits()) * KING_ROOK;
-    attacks_from_other_pieces += __builtin_popcountll((attacks::queen(kingSq, occ) & board.pieces(PieceType::QUEEN, ~color)).getBits()) * KING_QUEEN;
+    auto king_queen = attacks::queen(kingSq, occ);
+    attacks_from_other_pieces += __builtin_popcountll((king_queen & board.pieces(PieceType::PAWN, ~color)).getBits()) * KING_PAWN;
+    attacks_from_other_pieces += __builtin_popcountll((king_queen & board.pieces(PieceType::KNIGHT, ~color)).getBits()) * KING_KNIGHT;
+    attacks_from_other_pieces += __builtin_popcountll((king_queen & board.pieces(PieceType::BISHOP, ~color)).getBits()) * KING_BISHOP;
+    attacks_from_other_pieces += __builtin_popcountll((king_queen & board.pieces(PieceType::ROOK, ~color)).getBits()) * KING_ROOK;
+    attacks_from_other_pieces += __builtin_popcountll((king_queen & board.pieces(PieceType::QUEEN, ~color)).getBits()) * KING_QUEEN;
     return attacks_from_other_pieces;
 }
 //"rn1q1bnr/3k4/8/pP3pPp/p4B1p/N1p5/2p5/R3KBNR b KQ - 0 21"
