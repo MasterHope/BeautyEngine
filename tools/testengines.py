@@ -16,7 +16,7 @@ all_engine_test = [fn for fn in glob.glob("engines/**/*.exe", recursive=True)]
 #myEngineDir
 my_engine = "BeautyEngine.exe"
 #removed due lc0 messages of logging...
-sys.stderr = open(os.devnull, 'w')
+#sys.stderr = open(os.devnull, 'w')
 
 class Tournament:
     def __init__(self, number_matches, seconds_move, dir_engine_test, other_engine_options = {},*other_engine_dirs):
@@ -89,7 +89,14 @@ class Game:
             outcome = board.outcome(claim_draw=True)
         self.close_engines(engine, engine2)
         self.pgn.headers["Result"] = outcome.result()
-        with open("tools/games/games.pgn", "a") as f:
+        filename = "tools/games/games_" + str(self.seconds_move) + ".pgn"
+        #https://stackoverflow.com/questions/20432912/writing-to-a-new-file-if-it-doesnt-exist-and-appending-to-a-file-if-it-does
+        append_write = ''
+        if (os.path.exists):
+            append_write = 'a'
+        else:
+            append_write = 'w'
+        with open(filename, append_write) as f:
             print(self.pgn, file=f, end="\n\n")
         if outcome.winner != None:
             return chess.Outcome(outcome.termination, outcome.winner == engine_test_turn)
@@ -140,6 +147,6 @@ def get_engine_name_from_dir(dir_other_engine):
     return path.basename(path.normpath(dir_other_engine)).replace('-','.').split('.')[0]
 
 
-t = Tournament(2,0.1, my_engine, {}, *all_engine_test)
+t = Tournament(1,0.1, my_engine, {}, *all_engine_test)
 t.run()
 plot_wins(t.statistics, t.number_matches)
