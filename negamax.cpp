@@ -444,7 +444,10 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
                 //killers
                 if (!board.isCapture(move)){
                     //add move to killer moves...
+                    {
+                    std::lock_guard lk(killer_m);
                     updateKillers(ply, move);
+                    }
                     //https://www.chessprogramming.org/History_Heuristic
                     {
                     std::lock_guard lk(history_m);
@@ -483,20 +486,14 @@ void Negamax::updateKillers(int ply, const chess::Move &move)
 {
     if ((*killer_moves)[ply].first != Move())
     {
-        if ((*killer_moves)[ply].second == Move()){
-            {
-                std::lock_guard lk(killer_m);
-                (*killer_moves)[ply].second = move;
-            }
+        if ((*killer_moves)[ply].second == Move() && (*killer_moves)[ply].first != move){
+            (*killer_moves)[ply].second = move;
         }
         // I could save two killer moves max...
     }
-    else if ((*killer_moves)[ply].second != Move())
+    else
     {
-        {
-            std::lock_guard lk(killer_m);
-            (*killer_moves)[ply].first = move;
-        }
+        (*killer_moves)[ply].first = move;
     }
 }
 void Negamax::updateHistory(chess::Board &board, chess::Move &move, int bonus)
