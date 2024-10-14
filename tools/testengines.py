@@ -12,7 +12,8 @@ from datetime import datetime
 
 
 os.chdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine")
-all_engine_test = [fn for fn in glob.glob("engines/**/*.exe", recursive=True)]
+strong_engines = [fn for fn in glob.glob("engines/strong/**/*.exe", recursive=True)]
+fair_engines = [fn for fn in glob.glob("engines/fair/**/*.exe", recursive=True)]
 # myEngineDir
 my_engine = "BeautyEngine.exe"
 # removed due lc0 messages of logging...
@@ -152,12 +153,18 @@ class Game:
             self.pgn.headers["White"] = get_engine_name_from_dir(
                 self.dir_engine_to_test
             )
-            self.pgn.headers["Black"] = get_engine_name_from_dir(self.dir_other_engine)
+            other_engine = get_engine_name_from_dir(self.dir_other_engine)
+            if self.other_engine_options != {}:
+                other_engine += str(self.other_engine_options)
+            self.pgn.headers["Black"] = other_engine
         else:
             self.pgn.headers["Black"] = get_engine_name_from_dir(
                 self.dir_engine_to_test
             )
-            self.pgn.headers["White"] = get_engine_name_from_dir(self.dir_other_engine)
+            other_engine = get_engine_name_from_dir(self.dir_other_engine)
+            if self.other_engine_options != {}:
+                other_engine += str(self.other_engine_options)
+            self.pgn.headers["White"] = other_engine
         node = self.pgn
         return node
 
@@ -191,7 +198,29 @@ def get_engine_name_from_dir(dir_other_engine):
     )
 
 
-t = Tournament(2, 0.1, my_engine, {}, *all_engine_test)
-t.run()
-plot_wins(t.statistics, t.number_matches)
-plot_draws(t.statistics, t.number_matches)
+def test_stockfish_fairy_skill_level(number_matches, seconds_time):
+    for i in range(2, 8):
+        t = Tournament(number_matches, seconds_time, my_engine, {"Skill level": i}, *strong_engines[:-1])
+        t.run()
+        plot_wins(t.statistics, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png")
+        plot_draws(t.statistics, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png")
+
+def test_fair_engines(number_matches, seconds_time):
+    t = Tournament(number_matches, seconds_time, my_engine, {} ,*fair_engines)
+    t.run()
+    plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wfair"+ "t"+str(seconds_time) + ".png")
+    plot_draws(t.statistics, t.number_matches,os.getcwd() + "/tools/results/dfair"+ "t"+str(seconds_time) + ".png")
+
+def test_strong_engines(number_matches, seconds_time):
+    t = Tournament(number_matches, seconds_time, my_engine, {},*strong_engines)
+    t.run()
+    plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
+    plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
+
+time_seconds_arr = [0.1, 0.5, 1, 5, 10]
+number_matches = 100
+for i in range(len(time_seconds_arr)):
+    test_stockfish_fairy_skill_level(number_matches,time_seconds_arr[i])
+    test_fair_engines(number_matches, time_seconds_arr[i])
+    test_strong_engines(number_matches, time_seconds_arr[i])
+

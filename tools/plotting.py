@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import chess
 #https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html#sphx-glr-gallery-lines-bars-and-markers-barchart-py
-def plot_wins(tournamentStats, number_matches):
+def plot_wins(tournamentStats, number_matches, file_name):
     width = 0.25
     multiplier = 0
     fig, ax = plt.subplots(layout="constrained")
@@ -24,9 +24,9 @@ def plot_wins(tournamentStats, number_matches):
     ax.set_xticks(x + width, engines)
     ax.legend(loc='upper left', ncols=len(engines))
     ax.set_ylim(0, number_matches + 2)
-    plt.show()
+    plt.savefig(file_name)
 
-def plot_draws(tournamentStats, number_matches):
+def plot_draws(tournamentStats, number_matches, file_name):
     width = 0.10
     multiplier = 0
     fig, ax = plt.subplots(layout="constrained")
@@ -53,4 +53,4 @@ def plot_draws(tournamentStats, number_matches):
     ax.set_xticks(x + width, engines)
     ax.legend(loc='upper left', ncols=len(engines))
     ax.set_ylim(0, number_matches + 2)
-    plt.show()
+    plt.savefig(file_name)
