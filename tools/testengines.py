@@ -17,7 +17,7 @@ fair_engines = [fn for fn in glob.glob("engines/fair/**/*.exe", recursive=True)]
 # myEngineDir
 my_engine = "BeautyEngine.exe"
 # removed due lc0 messages of logging...
-# sys.stderr = open(os.devnull, 'w')
+sys.stderr = open(os.devnull, 'w')
 
 
 class Tournament:
@@ -198,8 +198,8 @@ def get_engine_name_from_dir(dir_other_engine):
     )
 
 
-def test_stockfish_fairy_skill_level(number_matches, seconds_time):
-    for i in range(2, 8):
+def test_stockfisk_skill_level(number_matches, seconds_time):
+    for i in range(3, 6):
         t = Tournament(number_matches, seconds_time, my_engine, {"Skill level": i}, *strong_engines[:-1])
         t.run()
         plot_wins(t.statistics, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png")
@@ -217,10 +217,10 @@ def test_strong_engines(number_matches, seconds_time):
     plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
 
-time_seconds_arr = [0.1, 0.5, 1, 5, 10]
-number_matches = 100
+time_seconds_arr = [0.1, 0.5, 1, 5]
+number_matches = 50
 for i in range(len(time_seconds_arr)):
-    test_stockfish_fairy_skill_level(number_matches,time_seconds_arr[i])
+    test_stockfisk_skill_level(number_matches,time_seconds_arr[i])
     test_fair_engines(number_matches, time_seconds_arr[i])
     test_strong_engines(number_matches, time_seconds_arr[i])
 
