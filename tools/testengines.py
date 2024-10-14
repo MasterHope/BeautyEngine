@@ -215,9 +215,9 @@ def test_strong_engines(number_matches, seconds_time):
     t = Tournament(number_matches, seconds_time, my_engine, {},*strong_engines)
     t.run()
     plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
-    plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
+    plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
 
-time_seconds_arr = [0.1, 0.5, 1, 5]
+time_seconds_arr = [1,5]
 number_matches = 50
 for i in range(len(time_seconds_arr)):
     test_stockfisk_skill_level(number_matches,time_seconds_arr[i])
