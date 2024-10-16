@@ -74,7 +74,7 @@ def plot_win_time(time_seconds_arr, file_name, **engines_stats):
         ax.set_title(f'Engine {engine_keys[i]} wins')
         ax.set_xticks(x)
         ax.set_xticklabels(seconds)  
-        ax.set_ylim(0, 1)  
+        ax.set_ylim(0, 100)  
         ax.legend(loc='upper left')
         
     plt.savefig(file_name)
@@ -94,7 +94,7 @@ def plot_win_skill_level(time_seconds, file_name, range_level, **engines_stats):
     ax.set_title(f'Stockfish skill level wins with ' + seconds)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)  
-    ax.set_ylim(0, 1)  
+    ax.set_ylim(0, 100)  
     ax.legend(loc='upper left')
     
     plt.savefig(file_name)

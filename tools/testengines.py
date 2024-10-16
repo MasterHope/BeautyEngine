@@ -216,7 +216,7 @@ def test_stockfisk_skill_level(number_matches, seconds_time, range_level, **engi
     flat_stats = [round for tournament in flat_stats for round in tournament]
     plot_wins(flat_stats, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png")
     plot_draws(flat_stats, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png")
-    plot_win_skill_level(seconds_time,  os.getcwd() + "/tools/results/winratestockfishskill" + str(seconds_time) + ".png", range_level,stockfish_sl=[round.wins/number_matches for round in flat_stats])
+    plot_win_skill_level(seconds_time,  os.getcwd() + "/tools/results/winratestockfishskill" + str(seconds_time) + ".png", range_level,stockfish_sl=[(round.wins/number_matches) * 100 for round in flat_stats])
     return flat_stats
 
 def test_fair_engines(number_matches, seconds_time):
@@ -233,7 +233,7 @@ def test_strong_engines(number_matches, seconds_time):
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
     return t.statistics
 
-time_seconds_arr = [0.1, 0.2, 0.5, 1]
+time_seconds_arr = [0.1,0.2,0.5,1]
 number_matches = 50
 low = 3
 up = 8
@@ -249,9 +249,9 @@ for i in range(len(time_seconds_arr)):
     stockfish_skill = test_stockfisk_skill_level(number_matches,time_seconds_arr[i],range_stockfish_level)
     fair = test_fair_engines(number_matches, time_seconds_arr[i])
     strong = test_strong_engines(number_matches, time_seconds_arr[i])
-    stockfish_sl_stats.append(sum([round.wins for round in stockfish_skill])/(number_matches * (up-low)))
-    fair_engines_stats.append(sum([round.wins for round in fair])/(number_matches * len(fair_engines)))
-    strong_stats.append(sum([round.wins for round in strong])/(number_matches * len(strong_engines)))
+    stockfish_sl_stats.append(sum([round.wins for round in stockfish_skill])/(number_matches * (up-low)) * 100)
+    fair_engines_stats.append(sum([round.wins for round in fair])/(number_matches * len(fair_engines)) * 100)
+    strong_stats.append(sum([round.wins for round in strong])/(number_matches * len(strong_engines)) * 100)
     
 plot_win_time(time_seconds_arr, os.getcwd() + "/tools/results/winrate.png",stockfish_sl=stockfish_sl_stats, strong=strong_stats, fair=fair_engines_stats)
 
