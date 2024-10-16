@@ -54,3 +54,29 @@ def plot_draws(tournamentStats, number_matches, file_name):
     ax.legend(loc='upper left', ncols=len(engines))
     ax.set_ylim(0, number_matches + 2)
     plt.savefig(file_name)
+
+def plot_win_time(time_seconds_arr, file_name, **engines_stats):
+    num_engines = len(engines_stats) 
+    seconds = [str(s) + " seconds" for s in time_seconds_arr]
+    x = np.arange(len(seconds))  
+
+    fig, axes = plt.subplots(num_engines, 1, figsize=(8, 4 * num_engines), layout="constrained")
+
+    if num_engines == 1:
+        axes = [axes]
+    engine_keys = list(engines_stats.keys())
+    for i, engine in enumerate(engines_stats.values()):
+        ax = axes[i]  
+        width = 0.8  
+        rects = ax.bar(x, engine, width, label='% wins')  
+        ax.bar_label(rects, padding=2) 
+        ax.set_ylabel('% wins')
+        ax.set_title(f'Engine {engine_keys[i]} wins')
+        ax.set_xticks(x)
+        ax.set_xticklabels(seconds)  
+        ax.set_ylim(0, 1)  
+        ax.legend(loc='upper left')
+        
+    plt.savefig(file_name)
+
+plot_win_time([0.1,0.5], r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\tools\file.png",stockfish=[0.3,0.1],strong=[0.2,0.1] ,fair=[0.6,0.5])

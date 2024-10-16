@@ -7,7 +7,7 @@ import glob
 import random
 from tqdm import tqdm
 from os import path
-from plotting import plot_wins, plot_draws
+from plotting import plot_wins, plot_draws, plot_win_time
 from datetime import datetime
 
 options = {"Skill level": "sl"}
@@ -252,6 +252,5 @@ for i in range(len(time_seconds_arr)):
     fair_engines_stats.append(sum([round.wins for round in fair])/(number_matches * len(fair_engines)))
     strong_stats.append(sum([round.wins for round in strong])/(number_matches * len(strong_engines)))
     
-print(stockfish_sl_stats)
-print(strong_stats)
-print(fair_engines_stats)
+plot_win_time(time_seconds_arr, os.getcwd() + "/tools/results/winrate.png",{"stockfish_sl":stockfish_sl_stats}, {"strong":strong_stats}, {"fair":fair_engines_stats})
+
