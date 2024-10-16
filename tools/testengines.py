@@ -55,7 +55,7 @@ class Tournament:
                 info["Round"] = j + 1
                 pbar.set_description(
                     "Playing against %s match number %d/%d"
-                    % (engine_opponent, j + 1, self.number_matches)
+                    % (engine_opponent + str(self.other_engine_options), j + 1, self.number_matches)
                 )
                 game = Game(
                     self.seconds_move,
@@ -199,11 +199,14 @@ def get_engine_name_from_dir(dir_other_engine):
 
 
 def test_stockfisk_skill_level(number_matches, seconds_time):
-    for i in range(3, 6):
+    flat_stats = []
+    for i in range(3, 8):
         t = Tournament(number_matches, seconds_time, my_engine, {"Skill level": i}, *strong_engines[:-1])
         t.run()
-        plot_wins(t.statistics, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png")
-        plot_draws(t.statistics, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png")
+        flat_stats.append(t.statistics)
+    flat_stats = [round for tournament in flat_stats for round in tournament]
+    plot_wins(flat_stats, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png", " i")
+    plot_draws(flat_stats, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png", " i")
 
 def test_fair_engines(number_matches, seconds_time):
     t = Tournament(number_matches, seconds_time, my_engine, {} ,*fair_engines)
@@ -217,10 +220,10 @@ def test_strong_engines(number_matches, seconds_time):
     plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
 
-time_seconds_arr = [10]
-number_matches = 5
+time_seconds_arr = [0.1]
+number_matches = 1
 for i in range(len(time_seconds_arr)):
-    #test_stockfisk_skill_level(number_matches,time_seconds_arr[i])
-    test_fair_engines(number_matches, time_seconds_arr[i])
-    #test_strong_engines(number_matches, time_seconds_arr[i])
+    test_stockfisk_skill_level(number_matches,time_seconds_arr[i])
+    """ test_fair_engines(number_matches, time_seconds_arr[i])
+    test_strong_engines(number_matches, time_seconds_arr[i]) """
 

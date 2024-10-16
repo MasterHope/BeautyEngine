@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import chess
 #https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html#sphx-glr-gallery-lines-bars-and-markers-barchart-py
-def plot_wins(tournamentStats, number_matches, file_name):
+def plot_wins(tournamentStats, number_matches, file_name, engine_options = ""):
     width = 0.25
     multiplier = 0
     fig, ax = plt.subplots(layout="constrained")
@@ -21,12 +21,12 @@ def plot_wins(tournamentStats, number_matches, file_name):
 
     ax.set_ylabel('Number of games')
     ax.set_title('Game wins/draws/losses with ' +  str(tournamentStats[0].seconds_move) + ' seconds')
-    ax.set_xticks(x + width, engines)
+    ax.set_xticks(x + width, engines + engine_options)
     ax.legend(loc='upper left', ncols=len(engines))
     ax.set_ylim(0, number_matches + 2)
     plt.savefig(file_name)
 
-def plot_draws(tournamentStats, number_matches, file_name):
+def plot_draws(tournamentStats, number_matches, file_name, engine_options = ""):
     width = 0.10
     multiplier = 0
     fig, ax = plt.subplots(layout="constrained")
@@ -50,7 +50,7 @@ def plot_draws(tournamentStats, number_matches, file_name):
 
     ax.set_ylabel('Number of games')
     ax.set_title('Game draws divided by reason with ' +  str(tournamentStats[0].seconds_move) + ' seconds')
-    ax.set_xticks(x + width, engines)
+    ax.set_xticks(x + width, engines + engine_options)
     ax.legend(loc='upper left', ncols=len(engines))
     ax.set_ylim(0, number_matches + 2)
     plt.savefig(file_name)
