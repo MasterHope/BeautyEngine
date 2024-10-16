@@ -19,7 +19,7 @@ fair_engines = [fn for fn in glob.glob("engines/fair/**/*.exe", recursive=True)]
 # myEngineDir
 my_engine = "BeautyEngine.exe"
 # removed due lc0 messages of logging...
-# sys.stderr = open(os.devnull, 'w')
+sys.stderr = open(os.devnull, 'w')
 
 
 class Tournament:
