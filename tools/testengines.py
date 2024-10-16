@@ -232,10 +232,10 @@ def test_strong_engines(number_matches, seconds_time):
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
     return t.statistics
 
-time_seconds_arr = [0.05,0.1]
-number_matches = 2
+time_seconds_arr = [0.1,0.5,1]
+number_matches = 50
 low = 3
-up = 5
+up = 8
 range_stockfish_level = range(low,up)
 stockfish_sl_stats = []
 fair_engines_stats = []
