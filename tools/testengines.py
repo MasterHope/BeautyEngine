@@ -10,6 +10,8 @@ from os import path
 from plotting import plot_wins, plot_draws
 from datetime import datetime
 
+options = {"Skill level": "sl"}
+
 
 os.chdir(r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine")
 strong_engines = [fn for fn in glob.glob("engines/strong/**/*.exe", recursive=True)]
@@ -17,7 +19,7 @@ fair_engines = [fn for fn in glob.glob("engines/fair/**/*.exe", recursive=True)]
 # myEngineDir
 my_engine = "BeautyEngine.exe"
 # removed due lc0 messages of logging...
-sys.stderr = open(os.devnull, 'w')
+# sys.stderr = open(os.devnull, 'w')
 
 
 class Tournament:
@@ -44,7 +46,7 @@ class Tournament:
         )
         for i in range(len(self.other_engine_dirs)):
             dir_engine_opponent = self.other_engine_dirs[i]
-            engine_opponent = get_engine_name_from_dir(dir_engine_opponent)
+            engine_opponent = get_engine_name_from_dir(dir_engine_opponent, self.other_engine_options)
             round_stats = RoundStatistics(self.seconds_move, engine_opponent)
             info = {
                 "Event": "Tournament for my engine",
@@ -55,7 +57,7 @@ class Tournament:
                 info["Round"] = j + 1
                 pbar.set_description(
                     "Playing against %s match number %d/%d"
-                    % (engine_opponent + str(self.other_engine_options), j + 1, self.number_matches)
+                    % (engine_opponent, j + 1, self.number_matches)
                 )
                 game = Game(
                     self.seconds_move,
@@ -153,17 +155,13 @@ class Game:
             self.pgn.headers["White"] = get_engine_name_from_dir(
                 self.dir_engine_to_test
             )
-            other_engine = get_engine_name_from_dir(self.dir_other_engine)
-            if self.other_engine_options != {}:
-                other_engine += str(self.other_engine_options)
+            other_engine = get_engine_name_from_dir(self.dir_other_engine, self.other_engine_options)
             self.pgn.headers["Black"] = other_engine
         else:
             self.pgn.headers["Black"] = get_engine_name_from_dir(
                 self.dir_engine_to_test
             )
-            other_engine = get_engine_name_from_dir(self.dir_other_engine)
-            if self.other_engine_options != {}:
-                other_engine += str(self.other_engine_options)
+            other_engine = get_engine_name_from_dir(self.dir_other_engine, self.other_engine_options)
             self.pgn.headers["White"] = other_engine
         node = self.pgn
         return node
@@ -192,10 +190,21 @@ class Game:
         engine2.quit()
 
 
-def get_engine_name_from_dir(dir_other_engine):
-    return (
-        path.basename(path.normpath(dir_other_engine)).replace("-", ".").split(".")[0]
-    )
+def get_engine_name_from_dir(dir_other_engine, other_options = {}):
+    if other_options=={}:
+        return path.basename(path.normpath(dir_other_engine)).replace("-", ".").split(".")[0]
+    else:
+        return path.basename(path.normpath(dir_other_engine)).replace("-", ".").split(".")[0] + format_options(other_options)
+
+def format_options(other_options):
+    str_final = ""
+    for key, value in other_options.items():
+        if key in options:
+            key = options[key]
+        str_final = "".join([str_final + "_", key + ":", str(value)])
+    return str_final
+
+
 
 
 def test_stockfisk_skill_level(number_matches, seconds_time):
@@ -205,25 +214,29 @@ def test_stockfisk_skill_level(number_matches, seconds_time):
         t.run()
         flat_stats.append(t.statistics)
     flat_stats = [round for tournament in flat_stats for round in tournament]
-    plot_wins(flat_stats, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png", " i")
-    plot_draws(flat_stats, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png", " i")
+    plot_wins(flat_stats, t.number_matches,  os.getcwd() + "/tools/results/wskill"+ str(i) + "-" + "t"+str(seconds_time) + ".png")
+    plot_draws(flat_stats, t.number_matches, os.getcwd() +"/tools/results/dskill"+ str(i) + "-" + "t"+str(seconds_time)+".png")
+    return flat_stats
 
 def test_fair_engines(number_matches, seconds_time):
     t = Tournament(number_matches, seconds_time, my_engine, {} ,*fair_engines)
     t.run()
     plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wfair"+ "t"+str(seconds_time) + ".png")
     plot_draws(t.statistics, t.number_matches,os.getcwd() + "/tools/results/dfair"+ "t"+str(seconds_time) + ".png")
+    return t.statistics
 
 def test_strong_engines(number_matches, seconds_time):
     t = Tournament(number_matches, seconds_time, my_engine, {},*strong_engines)
     t.run()
     plot_wins(t.statistics, t.number_matches, os.getcwd() + "/tools/results/wstrong"+ "t"+str(seconds_time) + ".png")
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
+    return t.statistics
 
 time_seconds_arr = [0.1]
 number_matches = 1
-for i in range(len(time_seconds_arr)):
-    test_stockfisk_skill_level(number_matches,time_seconds_arr[i])
-    """ test_fair_engines(number_matches, time_seconds_arr[i])
-    test_strong_engines(number_matches, time_seconds_arr[i]) """
+stockfish_stats = []
+fair_engines_stats = []
 
+for i in range(len(time_seconds_arr)):
+    stockfish_stats.append(test_stockfisk_skill_level(number_matches,time_seconds_arr[i]))
+    fair_engines_stats.append(test_fair_engines(number_matches, time_seconds_arr[i]))
