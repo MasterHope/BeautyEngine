@@ -79,4 +79,27 @@ def plot_win_time(time_seconds_arr, file_name, **engines_stats):
         
     plt.savefig(file_name)
 
-plot_win_time([0.1,0.5], r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\tools\file.png",stockfish=[0.3,0.1],strong=[0.2,0.1] ,fair=[0.6,0.5])
+
+def plot_win_skill_level(time_seconds, file_name, range_level, **engines_stats):
+    engines = engines_stats["stockfish_sl"]
+    num_engines = len(engines_stats["stockfish_sl"]) 
+    seconds = str(time_seconds) + " seconds"
+    x = np.arange(len(engines))  
+    labels = ["Stockfish " + str(i) for i in range_level]
+    fig, ax = plt.subplots(layout="constrained")
+    width = 0.8  
+    rects = ax.bar(x, engines, width, label='% wins')  
+    ax.bar_label(rects, padding=2) 
+    ax.set_ylabel('% wins')
+    ax.set_title(f'Stockfish skill level wins with ' + seconds)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)  
+    ax.set_ylim(0, 1)  
+    ax.legend(loc='upper left')
+    
+    plt.savefig(file_name)
+
+
+
+
+#plot_win_time([0.1,0.5], r"C:\Users\belle\OneDrive\Desktop\chess_thesis\BeautyEngine\tools\file.png",stockfish=[0.3,0.1],strong=[0.2,0.1] ,fair=[0.6,0.5])
