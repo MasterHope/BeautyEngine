@@ -207,9 +207,9 @@ def format_options(other_options):
 
 
 
-def test_stockfisk_skill_level(number_matches, seconds_time):
+def test_stockfisk_skill_level(number_matches, seconds_time, range_level):
     flat_stats = []
-    for i in range(3, 8):
+    for i in range_level:
         t = Tournament(number_matches, seconds_time, my_engine, {"Skill level": i}, *strong_engines[:-1])
         t.run()
         flat_stats.append(t.statistics)
@@ -232,11 +232,26 @@ def test_strong_engines(number_matches, seconds_time):
     plot_draws(t.statistics, t.number_matches, os.getcwd() + "/tools/results/dstrong"+ "t"+str(seconds_time) + ".png")
     return t.statistics
 
-time_seconds_arr = [0.1]
-number_matches = 1
-stockfish_stats = []
+time_seconds_arr = [0.05,0.1]
+number_matches = 2
+low = 3
+up = 5
+range_stockfish_level = range(low,up)
+stockfish_sl_stats = []
 fair_engines_stats = []
+strong_stats = []
+win_stockfish_sl = []
+win_fair_engine = []
+win_strong = []
 
 for i in range(len(time_seconds_arr)):
-    stockfish_stats.append(test_stockfisk_skill_level(number_matches,time_seconds_arr[i]))
-    fair_engines_stats.append(test_fair_engines(number_matches, time_seconds_arr[i]))
+    stockfish_skill = test_stockfisk_skill_level(number_matches,time_seconds_arr[i],range_stockfish_level)
+    fair = test_fair_engines(number_matches, time_seconds_arr[i])
+    strong = test_strong_engines(number_matches, time_seconds_arr[i])
+    stockfish_sl_stats.append(sum([round.wins for round in stockfish_skill])/(number_matches * (up-low)))
+    fair_engines_stats.append(sum([round.wins for round in fair])/(number_matches * len(fair_engines)))
+    strong_stats.append(sum([round.wins for round in strong])/(number_matches * len(strong_engines)))
+    
+print(stockfish_sl_stats)
+print(strong_stats)
+print(fair_engines_stats)
