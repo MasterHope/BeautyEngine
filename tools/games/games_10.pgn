@@ -1,0 +1,200 @@
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "1"]
+[White "Goldfish"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. d4 Nf6 2. Nc3 d5 3. Bf4 e6 4. e3 Be7 5. Bd3 O-O 6. a3 c5 7. dxc5 Bxc5 8. b4 Bd6 9. Bxd6 Qxd6 10. Nf3 a5 11. bxa5 Rxa5 12. a4 Rc5 13. Nb5 Qe7 14. Nfd4 e5 15. Nb3 Rc6 16. Na7 Rc7 17. Nb5 Rd7 18. Qd2 Ne4 19. Bxe4 dxe4 20. Qc3 Rdd8 21. Qc5 Qg5 22. g3 Nd7 23. Qb4 Qg4 24. Nd2 Nf6 25. Nc3 Qh3 26. Ncxe4 Ng4 27. Ke2 Nxh2 28. Nf3 Bg4 29. Ng5 Qh5 30. Rxh2 Qxg5 31. Rh4 Bxf3+ 32. Kxf3 Qf5+ 33. Kg2 Qxc2 34. Qxb7 h6 35. Qe4 Qc3 36. Rb1 Rd2 37. Rh5 Re8 38. Rhh1 f5 39. Qxf5 Rf8 40. Qe6+ Kh7 41. Rxh6+ gxh6 42. Rb7+ Qc7 43. Rxc7+ Rd7 44. Rxd7+ Rf7 45. Rxf7+ Kg8 46. Qe8# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "2"]
+[White "Goldfish"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. d4 Nf6 2. Nc3 d5 3. Bf4 e6 4. e3 c6 5. Nf3 Bd6 6. Bd3 Bxf4 7. exf4 O-O 8. a3 Qc7 9. g3 c5 10. Nb5 Qa5+ 11. Qd2 Qxd2+ 12. Kxd2 Na6 13. Ne5 cxd4 14. Nxd4 Ne4+ 15. Bxe4 dxe4 16. Rhe1 f6 17. Nc4 Rd8 18. Ke3 f5 19. Ne5 Nc5 20. Red1 Re8 21. Nb5 Rf8 22. Rd6 a5 23. Rad1 a4 24. Nc7 Rb8 25. Rb6 h5 26. Rdd6 Rf7 27. Nxf7 Kxf7 28. Rb5 Nd7 29. Nxe6 Ke7 30. Rbd5 Nf6 31. Nxg7 Nxd5+ 32. Rxd5 Kf6 33. Nxh5+ Kf7 34. Rd8 b5 35. h3 Ke7 36. Rh8 Kd6 37. Ng7 Kc7 38. Rh5 b4 39. Nxf5 bxa3 40. bxa3 Rb2 41. Nd4 Ra2 42. Kxe4 Bd7 43. Rh7 Kd6 44. Rh6+ Kc5 45. Rh5+ Kb6 46. Rh6+ Kc5 47. Rh5+ Kb6 48. Kd5 Rxa3 49. Kd6 Be8 50. Rh8 Bg6 51. f5 Bxf5 52. Rb8+ Ka6 53. Nxf5 Ka7 54. Rb4 Ra2 55. Nd4 a3 56. Kc7 Rxc2+ 57. Nxc2 Ka6 58. Nxa3 Ka5 59. Rc4 Ka6 60. Ra4# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "3"]
+[White "BeautyEngine"]
+[Black "Goldfish"]
+[Result "0-1"]
+
+1. Nf3 d5 2. d4 Nc6 3. e3 Nf6 4. Nc3 h5 5. Bb5 a6 6. Bxc6+ bxc6 7. O-O Bf5 8. Ne5 Qd6 9. h3 Nd7 10. Qf3 g6 11. Nxd7 Qxd7 12. Bd2 Bxc2 13. Rfc1 Bf5 14. Re1 Bg7 15. Rad1 g5 16. e4 dxe4 17. Nxe4 g4 18. Qg3 h4 19. Qf4 gxh3 20. gxh3 Bxh3 21. Kh2 Bg4 22. f3 Be6 23. Bb4 a5 24. Bc3 Bd5 25. Rg1 Rh7 26. Ng5 Rh5 27. Ne4 Kf8 28. Rg2 f6 29. Rg6 Bf7 30. Rg2 Bh6 31. Qg4 f5 32. Qh3 Qd5 33. Nc5 Bf4+ 34. Kh1 Bg3 35. Rf1 e5 36. Rd2 Bf4 37. Rdd1 Rg5 38. Nd3 Rg3 39. Qxh4 Rxf3 40. Qh8+ Ke7 41. Qh4+ Kf8 42. Qh8+ Bg8 43. Qf6+ Ke8 44. Qg6+ Ke7 45. Qg2 Rg3 46. Nxf4 exf4 47. Rde1+ Kd7 48. Re2 Qc4 49. Rfe1 Bd5 50. Kg1 Bxg2 51. Rxg2 Rag8 52. Rxg3 Rxg3+ 53. Kf2 Qd3 54. Re7+ Kxe7 55. Bb4+ axb4 56. a3 Qe3+ 57. Kf1 Rg1# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "4"]
+[White "BeautyEngine"]
+[Black "Goldfish"]
+[Result "0-1"]
+
+1. Nf3 d5 2. Nc3 d4 3. Ne4 Nc6 4. e3 Nf6 5. Nxf6+ exf6 6. exd4 Nxd4 7. Nxd4 Qxd4 8. Qe2+ Kd8 9. c3 Qd5 10. d4 Bd6 11. Be3 Be6 12. O-O-O Qxa2 13. d5 Bxd5 14. Qd3 Bc6 15. Be2 Bxg2 16. Rhg1 Qa1+ 17. Kd2 Qxb2+ 18. Ke1 Bc6 19. Rxg7 Ke7 20. Bh5 Qb5 21. Rxf7+ Kd8 22. Qd4 Qe5 23. Rxf6 Qxd4 24. Bxd4 Rg8 25. Ke2 Be4 26. Ke3 Bg6 27. Bxg6 hxg6 28. Kf3 Bxh2 29. Bc5+ Kc8 30. Be7 b6 31. Rd5 Kb7 32. Kg2 Rae8 33. Rf7 Bf4 34. Kf3 Kc6 35. c4 Bh6 36. Rf6+ Kb7 37. Rf7 Rg7 38. Rxg7 Bxg7 39. Bg5 Re6 40. Rd7 Bb2 41. Rh7 Bc3 42. Rh6 a5 43. Rh4 a4 44. c5 b5 45. Re4 Rxe4 46. Kxe4 a3 47. Kd3 Bh8 48. Ke4 a2 49. Be3 a1=Q 50. Kf3 Qd1+ 51. Kg3 Be5+ 52. Bf4 Bxf4+ 53. Kxf4 b4 54. Kg5 b3 55. Kxg6 b2 56. Kh6 c6 57. f3 Qxf3 58. Kg5 b1=Q 59. Kh4 Qbh1+ 60. Kg5 Qhh5# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "5"]
+[White "Goldfish"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. d4 d5 2. Nf3 Nc6 3. Nc3 Nf6 4. Bf4 Bf5 5. Nh4 Be6 6. Nf3 Bf5 7. h3 e6 8. g4 Be4 9. Bg2 Bb4 10. a3 Bxc3+ 11. bxc3 h6 12. Qb1 Rb8 13. a4 O-O 14. Qb3 Na5 15. Qb5 Nc4 16. Qc5 Bxc2 17. Bxc7 b6 18. Bxd8 bxc5 19. Be7 Rfe8 20. Bxc5 Ne4 21. Bxa7 Rb2 22. Ne5 Nxc3 23. Nxc4 dxc4 24. Kf1 Bxa4 25. e3 Bc2 26. Bc5 Bd3+ 27. Kg1 Ne4 28. Ba3 Rc2 29. f4 Re2 30. Bc1 c3 31. Bf3 Re1+ 32. Kh2 Rxh1+ 33. Kxh1 c2 34. Bg2 Rb8 35. Kh2 Rb3 36. Ra8+ Kh7 37. Ra3 Nd2 38. d5 Rxa3 39. Bxa3 Nc4 40. Bc1 Kg6 41. h4 h5 42. g5 Nd6 43. dxe6 fxe6 44. Bc6 Kf7 45. Bf3 g6 46. Kg3 Ke7 47. Kf2 Nf5 48. Bh1 Kd7 49. e4 Nd6 50. Ke3 Bc4 51. Kd2 Bb3 52. Bg2 Ba4 53. Kd3 Kc7 54. Ba3 Bb3 55. Bb2 Nc4 56. Kc3 Nxb2 57. Kxb2 Kd7 58. e5 Ke8 59. Bc6+ Ke7 60. Ba8 Ke8 61. Kc1 Ba4 62. Bb7 Ke7 63. Ba6 Bb3 64. Bd3 Kf7 65. Bxc2 Bd5 66. Kd1 Bf3+ 67. Kd2 Bg4 68. Bd3 Kg7 69. Be4 Kf7 70. Bc6 Ke7 71. Be4 Kf7 72. Ke3 Bh3 73. Kd3 Bg4 74. Kc4 Bd1 75. Bd3 Bg4 76. Kb4 Kg7 77. Kc5 Kf7 78. Kd6 Bf3 79. f5 gxf5 80. Bc4 Kg7 81. Bxe6 f4 82. Bd7 Be2 83. e6 f3 84. e7 f2 85. e8=Q f1=Q 86. Qe5+ Kg8 87. Be6+ Kh7 88. Bf5+ Qxf5 89. Qxf5+ Kg7 90. g6 Bd3 91. Qf7+ Kh8 92. Qf8# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "1"]
+[White "BeautyEngine"]
+[Black "maia1500"]
+[Result "0-1"]
+
+1. Nf3 d5 2. d4 c5 3. dxc5 e6 4. b4 a5 5. Bg5 Nf6 6. e4 axb4 7. e5 h6 8. Bh4 g5 9. Nxg5 hxg5 10. Bxg5 Be7 11. exf6 Bxf6 12. Bxf6 Qxf6 13. Nd2 Nc6 14. Be2 e5 15. O-O Qh6 16. h3 Bxh3 17. f4 Bxg2 18. Nf3 Bxf1 19. Kxf1 Qxf4 20. Kg2 e4 21. Qxd5 Rd8 22. Qb3 Nd4 23. Qa4+ Kf8 24. Qb3 exf3+ 25. Bxf3 Rh2+ 26. Kf1 Nxb3 27. cxb3 Qxf3+ 28. Kg1 Qg2# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "2"]
+[White "BeautyEngine"]
+[Black "maia1500"]
+[Result "0-1"]
+
+1. Nf3 d5 2. d4 c5 3. dxc5 e6 4. b4 a5 5. Bg5 Nf6 6. e4 axb4 7. e5 h6 8. Bh4 g5 9. Nxg5 hxg5 10. Bxg5 Be7 11. Bxf6 Bxf6 12. exf6 Qxf6 13. Nd2 Nc6 14. Be2 e5 15. O-O Qh6 16. h3 Bxh3 17. f4 Bxg2 18. Nf3 Bxf1 19. Kxf1 Qxf4 20. Kg2 e4 21. Qxd5 Rd8 22. Qb3 Nd4 23. Qa4+ Kf8 24. Qb3 exf3+ 25. Bxf3 Rh2+ 26. Kf1 Nxb3 27. cxb3 Qxf3+ 28. Ke1 Qe2# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "3"]
+[White "BeautyEngine"]
+[Black "maia1500"]
+[Result "1/2-1/2"]
+
+1. Nf3 d5 2. e3 c5 3. Bb5+ Bd7 4. c4 Bxb5 5. cxb5 e6 6. O-O Nf6 7. d4 Nbd7 8. Nc3 Be7 9. Bd2 O-O 10. Rc1 h6 11. h3 Rc8 12. a4 Bd6 13. Re1 Bc7 14. Qc2 Re8 15. Rcd1 Bb8 16. b3 Qc7 17. Qd3 e5 18. Nxe5 Nxe5 19. dxe5 Qxe5 20. g3 Rcd8 21. a5 Ne4 22. Nxe4 dxe4 23. Qc2 Rd3 24. Bc1 Red8 25. Ba3 b6 26. axb6 axb6 27. Bb2 Qh5 28. Rxd3 exd3 29. Qc3 f6 30. Qc4+ Kh8 31. Qg4 Qd5 32. Qc4 Qf3 33. Qg4 Qd5 34. Qc4 Qf3 35. Qg4 1/2-1/2
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "4"]
+[White "BeautyEngine"]
+[Black "maia1500"]
+[Result "0-1"]
+
+1. Nf3 d5 2. d4 c5 3. dxc5 e6 4. b4 a5 5. Bg5 Nf6 6. e4 axb4 7. e5 h6 8. Bh4 g5 9. Nxg5 hxg5 10. Bxg5 Be7 11. exf6 Bxf6 12. Bxf6 Qxf6 13. Nd2 Nc6 14. Be2 e5 15. O-O Qh6 16. h3 Bxh3 17. f4 Bxg2 18. Nf3 Bxf1 19. Kxf1 Qxf4 20. Kg2 e4 21. Qxd5 Rd8 22. Qb3 Nd4 23. Qa4+ Kf8 24. Qb3 exf3+ 25. Bxf3 Rh2+ 26. Kf1 Nxb3 27. cxb3 Qxf3+ 28. Kg1 Qg2# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "5"]
+[White "maia1500"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. d4 Nxe4 4. dxe5 Bc5 5. Be3 Bxe3 6. fxe3 O-O 7. Bd3 Nc5 8. Nc3 Nxd3+ 9. Qxd3 Nc6 10. O-O-O Re8 11. Qe4 d6 12. Qf4 Qe7 13. exd6 cxd6 14. Nd5 Qe6 15. Nc7 Qe7 16. Nxa8 Be6 17. Qxd6 Rxa8 18. Qxe7 Nxe7 19. Rd2 Re8 20. Rhd1 Nc6 21. b3 Bf5 22. Nd4 Bg4 23. Nxc6 Bxd1 24. Kxd1 bxc6 25. Rd7 Kf8 26. Rxa7 Rxe3 27. a4 Re5 28. Rc7 Rh5 29. h3 Rg5 30. g4 h5 31. Rxc6 hxg4 32. hxg4 Rxg4 33. a5 Ke8 34. a6 Kd7 35. Rb6 Rg1+ 36. Ke2 Ra1 37. b4 Ra2 38. Rb7+ Ke6 39. a7 Rxc2+ 40. Kd3 Ra2 41. b5 Ra3+ 42. Kc4 Ra4+ 43. Kc5 Kf5 44. b6 Kg4 45. Rb8 f5 46. a8=Q Re4 47. Re8 Re2 48. Rxe2 Kg5 49. b7 g6 50. b8=Q Kh6 51. Qh8+ Kg5 52. Rg2+ Kf4 53. Qh4+ Ke5 54. Re2# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "1"]
+[White "maia1700"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. d4 Nxe4 4. dxe5 Bc5 5. Bc4 Nxf2 6. Bxf7+ Kf8 7. Qd5 Nxh1 8. Qxc5+ Kxf7 9. Qd5+ Ke8 10. Bg5 Qxg5 11. Nxg5 Rf8 12. Nc3 Nf2 13. Nb5 Na6 14. Nxh7 Rf7 15. Qc4 Rb8 16. Ng5 Rf8 17. Nf3 Nh3 18. gxh3 Rxf3 19. O-O-O Kf8 20. Nxc7 Rf5 21. Nxa6 bxa6 22. Qc7 Rb6 23. Qxc8+ Kf7 24. Qxd7+ Kg6 25. Rg1+ Rg5 26. Rxg5+ Kxg5 27. e6 Kf6 28. e7 Re6 29. e8=Q Rxe8 30. Qxe8 Kg5 31. Qe5+ Kh6 32. c4 Kh7 33. c5 g5 34. Qxg5 a5 35. c6 a4 36. c7 a3 37. c8=Q axb2+ 38. Kxb2 a6 39. Qcg8# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "2"]
+[White "BeautyEngine"]
+[Black "maia1700"]
+[Result "0-1"]
+
+1. Nf3 Nf6 2. d4 g6 3. Nc3 Bg7 4. e4 d6 5. Bb5+ c6 6. Bd3 O-O 7. O-O Nbd7 8. h3 e5 9. Be3 Re8 10. Rc1 d5 11. dxe5 Nxe5 12. Nxe5 Rxe5 13. Bd4 Re8 14. exd5 Nxd5 15. Bxg7 Kxg7 16. Nxd5 Qxd5 17. c4 Qg5 18. Qf3 Qf6 19. Qxf6+ Kxf6 20. Rfd1 Be6 21. a4 Rad8 22. a5 Rd4 23. Bf1 Red8 24. Re1 Rd2 25. b4 R8d4 26. b5 c5 27. Re2 Rd1 28. Rxd1 Rxd1 29. Re4 Ra1 30. f3 Rxa5 31. Kf2 Ra2+ 32. Kg3 a5 33. Rh4 Kg7 34. Bd3 a4 35. Be4 a3 36. Bd5 Re2 37. Bxe6 fxe6 38. b6 a2 39. Re4 Rxe4 40. fxe4 a1=Q 41. Kf4 Qc3 42. e5 Qxc4+ 43. Ke3 Qd4+ 44. Kf3 c4 45. h4 c3 46. h5 c2 47. Kg3 c1=Q 48. Kh3 Qde3+ 49. g3 Qh1+ 50. Kg4 Qxh5# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "3"]
+[White "maia1700"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Nf6 5. Nc3 Bb4 6. Nxc6 dxc6 7. Qxd8+ Kxd8 8. f3 Be6 9. Bd2 Kc8 10. a3 Bc5 11. Ne2 Rd8 12. Nf4 Bf2+ 13. Ke2 Bc4+ 14. Nd3 Bd4 15. Rb1 h6 16. Be3 Rb8 17. Bxd4 Rxd4 18. Ke3 Rd8 19. b3 Be6 20. Nc5 Nd7 21. Nxe6 fxe6 22. Bc4 Re8 23. Rhd1 h5 24. h4 Ne5 25. Be2 Ng6 26. f4 Rf8 27. g3 Rh8 28. Rd2 c5 29. Rbd1 c6 30. Rd7 Rg8 31. Bxh5 Nf8 32. Re7 g6 33. Bg4 Rh8 34. Bxe6+ Nxe6 35. Rxe6 Rg8 36. Rdd6 Kc7 37. e5 Rbd8 38. Rxg6 Rxg6 39. Rxg6 Rd1 40. h5 Rc1 41. h6 Rxc2 42. h7 Rh2 43. Rg7+ Kb6 44. e6 Rh1 45. e7 c4 46. bxc4 Kc5 47. e8=Q Re1+ 48. Kd2 Rxe8 49. Rg8 Re7 50. h8=Q Rd7+ 51. Kc3 Kb6 52. Qd4+ Rxd4 53. Kxd4 Ka5 54. f5 c5+ 55. Kxc5 b6+ 56. Kc6 Ka4 57. f6 Kxa3 58. f7 Kb3 59. f8=Q Kc2 60. Qf3 Kc1 61. Qe2 Kb1 62. Rd8 b5 63. Rd1# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "4"]
+[White "maia1700"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. d4 Nxe4 4. dxe5 Bc5 5. Bc4 Nxf2 6. Bxf7+ Kf8 7. Qd5 Nxh1 8. Qxc5+ Kxf7 9. Qd5+ Ke8 10. Bg5 Qxg5 11. Nxg5 Rf8 12. Nc3 Nf2 13. Nb5 Na6 14. Nxh7 Rf7 15. Qc4 Rb8 16. Ng5 Rf8 17. Nf3 Nh3 18. gxh3 Rxf3 19. O-O-O Kf8 20. Nxc7 Rf5 21. Nxa6 bxa6 22. Qc7 Rb6 23. Qxc8+ Kf7 24. Qxd7+ Kg6 25. Rg1+ Rg5 26. Rxg5+ Kxg5 27. e6 Kf6 28. e7 Re6 29. e8=Q Rxe8 30. Qxe8 Kg5 31. Qe5+ Kh6 32. c4 Kh7 33. c5 g5 34. Qxg5 a5 35. c6 a4 36. c7 a3 37. c8=Q axb2+ 38. Kxb2 a6 39. Qcg8# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "5"]
+[White "maia1700"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. d4 exd4 4. e5 Ne4 5. Qxd4 d5 6. exd6 Nxd6 7. Nc3 Nc6 8. Qf4 Be7 9. Bd3 Be6 10. Be3 Bf6 11. O-O O-O 12. Rad1 h5 13. Bc5 b6 14. Bxd6 cxd6 15. Qe4 g6 16. Qxc6 Rc8 17. Qe4 Bxc3 18. bxc3 Rxc3 19. Qd4 Qc7 20. Ng5 Bf5 21. Bxf5 gxf5 22. Qf6 Rxc2 23. Qxf5 f6 24. Ne6 Qf7 25. Nxf8 Rc5 26. Qd7 Kxf8 27. Rxd6 Qxd7 28. Rxd7 Ra5 29. Rb7 Ke8 30. Re1+ Kd8 31. g3 Rxa2 32. Ree7 Ra1+ 33. Kg2 Ra2 34. Rxa7 Rxa7 35. Rxa7 Ke8 36. Rb7 b5 37. Rxb5 Ke7 38. Rxh5 Ke6 39. Kf3 Kf7 40. Kf4 Ke6 41. Ke4 Kd6 42. Kf5 Kd5 43. Kxf6+ Kd4 44. Re5 Kd3 45. f4 Kd2 46. f5 Kd1 47. g4 Kd2 48. g5 Kd1 49. g6 Kd2 50. g7 Kc2 51. g8=Q Kc3 52. Qg3+ Kd4 53. Qe3+ Kc4 54. Rc5+ Kb4 55. Qc3+ Ka4 56. Ra5# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "1"]
+[White "BeautyEngine"]
+[Black "maia1900"]
+[Result "1/2-1/2"]
+
+1. Nf3 Nf6 2. e3 g6 3. d4 Bg7 4. Nc3 d5 5. Bb5+ c6 6. Bd3 O-O 7. Bd2 Bg4 8. O-O Nbd7 9. h3 Bxf3 10. Qxf3 e5 11. Qg3 Nh5 12. Qh2 exd4 13. exd4 Bxd4 14. Rad1 Re8 15. Bf4 Nxf4 16. Qxf4 Bg7 17. Rfe1 Nc5 18. Rxe8+ Qxe8 19. Qb4 Nxd3 20. cxd3 Qd7 21. Re1 Re8 22. Rd1 Qe7 23. Qxe7 Rxe7 24. d4 Kf8 25. Kh2 Ke8 26. a4 Kd7 27. Kg3 Kd6 28. b4 a6 29. a5 Kc7 30. Kg4 b6 31. h4 bxa5 32. bxa5 Kd6 33. h5 Rb7 34. hxg6 hxg6 35. Kf4 Rb4 36. Ke3 Rb3 37. Rd3 Bh6+ 38. f4 Bf8 39. Ne4+ dxe4 40. Rxb3 Kd5 41. Rb8 Be7 42. Re8 Bb4 43. f5 c5 44. Re5+ Kd6 45. fxg6 fxg6 46. Rg5 cxd4+ 47. Kxd4 Kc6 48. Rxg6+ Kb5 49. Kxe4 Bxa5 50. g4 Bc3 51. g5 a5 52. Rg8 a4 53. g6 a3 54. Ra8 Kb4 55. Kd3 Bb2 56. Ra7 Bf6 57. Ke4 Kb3 58. Kf5 Bc3 59. g7 Bxg7 60. Rb7+ Kc2 61. Rxg7 a2 62. Ra7 Kb2 63. Rxa2+ Kxa2 1/2-1/2
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "2"]
+[White "maia1900"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. Nxe5 Qe7 4. d4 d6 5. Nf3 Nxe4 6. Be2 d5 7. O-O Nc6 8. c4 Be6 9. Nc3 Nxc3 10. bxc3 dxc4 11. Re1 h6 12. Bxc4 O-O-O 13. Bxe6+ fxe6 14. Qb3 Rd5 15. Rb1 Na5 16. Qc2 Qf6 17. c4 Rd8 18. Qa4 Qg6 19. Bd2 b6 20. Bxa5 bxa5 21. Ne5 Qxb1 22. Rxb1 Bd6 23. Nf7 Rhf8 24. Nxd8 Kxd8 25. Rb8+ Ke7 26. Rxf8 Kxf8 27. Qxa5 a6 28. Qxa6 Ke7 29. c5 Bf4 30. g3 Bc1 31. a4 Bg5 32. f4 Bf6 33. Qc4 c6 34. a5 Kd7 35. a6 Kc7 36. Qb4 Kd7 37. a7 Ke8 38. a8=Q+ Kf7 39. Qbb7+ Be7 40. Qxc6 Kf6 41. Qg8 Kg6 42. Qcxe6+ Bf6 43. Qgf7+ Kh7 44. Qf5+ Kh8 45. Qf8# 1-0
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "3"]
+[White "BeautyEngine"]
+[Black "maia1900"]
+[Result "0-1"]
+
+1. Nf3 Nf6 2. Nc3 d5 3. d4 c5 4. dxc5 Nc6 5. Be3 e5 6. Bg5 Bxc5 7. Bxf6 gxf6 8. Qxd5 Qb6 9. Ne4 Nb4 10. Qc4 Bf5 11. Nxc5 Rc8 12. c3 Nc2+ 13. Kd1 Qd6+ 14. Kc1 Rxc5 15. Qh4 Nxa1 16. e4 Bg6 17. Be2 Qc6 18. Bd3 O-O 19. Rd1 Rxc3+ 20. bxc3 Qxc3+ 21. Kb1 Rc8 22. Re1 Qxd3+ 23. Kxa1 Rc2 24. Qxh7+ Bxh7 25. Nxe5 Qc3+ 26. Kb1 Qb2# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "4"]
+[White "BeautyEngine"]
+[Black "maia1900"]
+[Result "0-1"]
+
+1. Nf3 Nf6 2. e3 g6 3. d4 Bg7 4. Nc3 d5 5. Bb5+ c6 6. Bd3 O-O 7. O-O Bg4 8. h3 Bxf3 9. Qxf3 Nbd7 10. Qg3 Nh5 11. Qh4 e5 12. Qxd8 Raxd8 13. g4 Nhf6 14. Rd1 Ne8 15. Be2 Nd6 16. b3 exd4 17. exd4 Nc5 18. Bg5 f6 19. Be3 Ne6 20. f3 f5 21. Kg2 fxg4 22. hxg4 h5 23. Kh3 hxg4+ 24. fxg4 Nf4+ 25. Bxf4 Rxf4 26. Kg3 g5 27. Bf3 Rdf8 28. Rd3 Ne4+ 29. Nxe4 dxe4 30. Bxe4 Rxe4 31. c3 Rff4 32. Rc1 Rxg4+ 33. Kf2 Rgf4+ 34. Kg1 Re2 35. Rg3 Bf6 36. Rg2 Re3 37. Rf2 Rxf2 38. Kxf2 Rxc3 39. Rxc3 Bxd4+ 40. Re3 Bxe3+ 41. Kxe3 Kf7 42. b4 Ke6 43. Ke4 b6 44. a3 c5 45. bxc5 bxc5 46. Kd3 Kd5 47. Ke3 Kc4 48. a4 Kb4 49. a5 Kxa5 50. Kf2 Kb4 51. Kf3 a5 52. Ke2 a4 53. Kd1 a3 54. Kc2 g4 55. Kd2 g3 56. Ke2 a2 57. Kf3 a1=Q 58. Kxg3 Qf6 59. Kg4 c4 60. Kh5 c3 61. Kg4 c2 62. Kg3 c1=Q 63. Kg2 Qcf1+ 64. Kg3 Q6f4# 0-1
+
+[Event "Tournament for my engine"]
+[Site "Italy"]
+[Date "16-10-2024"]
+[Round "5"]
+[White "maia1900"]
+[Black "BeautyEngine"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nf6 3. Nxe5 Qe7 4. d4 d6 5. Nf3 Nxe4 6. Be2 d5 7. O-O Nc6 8. c4 Be6 9. Nc3 Nxc3 10. bxc3 dxc4 11. Re1 h6 12. Bxc4 O-O-O 13. Bxe6+ fxe6 14. Qb3 Rd5 15. Rb1 Na5 16. Qc2 Qf6 17. c4 Qf5 18. Rb2 Rd8 19. Qa4 Nc6 20. Rb5 Qg6 21. Rxb7 Nxd4 22. Rxa7 Nxf3+ 23. Kh1 Rd6 24. gxf3 Qh5 25. Ra8+ Kb7 26. c5 Qxc5 27. Be3 Qxe3 28. fxe3 Rb6 29. Qa7+ Kc6 30. Rc1+ Bc5 31. Rxh8 e5 32. Rc8 Kd7 33. Rxc7+ Ke6 34. R7xc5 Kf6 35. Qxb6+ Kg5 36. Rxe5+ Kh4 37. Qb4+ Kh3 38. Qg4# 1-0
+
