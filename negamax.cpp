@@ -80,7 +80,7 @@ int Negamax::quiescence(Board &board, int alpha, int beta, int quiescence_depth,
     alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
     //MATE IN
     beta = std::min(beta, CHECKMATE_SCORE - ply - 1);
-    //prune if mate founded...
+    //prune if mate found...
     if (alpha >= beta){
         return alpha;
     }
@@ -368,7 +368,7 @@ int Negamax::best_priv(Board &board, int local_depth, int alpha, int beta, int& 
     alpha = std::max(alpha, - CHECKMATE_SCORE + ply);
     //MATE IN
     beta = std::min(beta, CHECKMATE_SCORE - ply - 1);
-    //prune if mate founded...
+    //prune if mate found...
     if (alpha >= beta){
         return alpha;
     }
